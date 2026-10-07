@@ -1,0 +1,116 @@
+.citymap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+
+.citymap__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* soft paper vignette so UI floating on top reads well */
+.citymap__vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 42%, transparent 56%, rgba(72, 62, 46, 0.14) 100%),
+    linear-gradient(180deg, rgba(255, 253, 248, 0.5) 0%, transparent 16%, transparent 78%, rgba(72, 62, 46, 0.1) 100%);
+}
+
+/* ---------- problem pins ---------- */
+.pin--problem {
+  cursor: pointer;
+}
+.pin--problem:focus {
+  outline: none;
+}
+.pin__pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: pinPulse 2.6s var(--ease-in-out) infinite;
+}
+.pin__pulse--2 {
+  animation-delay: 1.3s;
+}
+.pin__card {
+  filter: drop-shadow(0 8px 14px rgba(60, 52, 40, 0.18));
+  transition: transform 0.22s var(--ease);
+  transform-box: fill-box;
+  transform-origin: bottom center;
+}
+.pin--problem:hover .pin__card {
+  transform: translateY(-4px);
+}
+.pin__icon {
+  pointer-events: none;
+}
+.pin--resolved {
+  animation: popIn 0.5s var(--ease) both;
+}
+
+@keyframes pinPulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.45;
+  }
+  70% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+/* ---------- tram ---------- */
+.tram {
+  animation: fadeIn 0.8s var(--ease) both;
+}
+.tram__car {
+  animation: tramRun 11s linear infinite;
+}
+@keyframes tramRun {
+  0% { transform: translate(470px, 760px) rotate(0deg); opacity: 0; }
+  6% { opacity: 1; }
+  25% { transform: translate(640px, 620px) rotate(0deg); }
+  50% { transform: translate(900px, 430px) rotate(0deg); }
+  75% { transform: translate(970px, 330px) rotate(0deg); }
+  94% { opacity: 1; }
+  100% { transform: translate(1120px, 210px) rotate(0deg); opacity: 0; }
+}
+
+/* ---------- unlock / growth reveal ---------- */
+.unlock--park,
+.growth {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bloom 1s var(--ease) both;
+}
+.growth {
+  animation-delay: 0.1s;
+}
+@keyframes bloom {
+  0% {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.maplabels text {
+  font-family: var(--font-sans);
+  paint-order: stroke;
+  stroke: rgba(255, 253, 248, 0.55);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}

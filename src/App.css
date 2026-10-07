@@ -1,0 +1,114 @@
+.app {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.app--dimmed .citymap {
+  transition: filter 0.4s var(--ease);
+  filter: saturate(0.92);
+}
+
+/* ---------- bottom-left status cluster ---------- */
+.status-cluster {
+  position: absolute;
+  left: 22px;
+  bottom: 22px;
+  z-index: 30;
+  display: flex;
+  gap: 10px;
+}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px 10px 12px;
+}
+.status__icon {
+  font-size: 18px;
+}
+.status__meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+.status__label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.status__value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ---------- guided demo hint ---------- */
+.demo-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 108px;
+  transform: translateX(-50%);
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px 12px 16px;
+  max-width: min(620px, calc(100vw - 44px));
+  background: rgba(255, 253, 248, 0.95);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid rgba(60, 52, 40, 0.1);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-lg);
+  animation: riseIn 0.6s var(--ease) 0.3s both;
+}
+.demo-hint__emoji {
+  font-size: 24px;
+}
+.demo-hint__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.demo-hint__text strong {
+  font-size: 13.5px;
+}
+.demo-hint__text span {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+.demo-hint__close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  color: var(--ink-ghost);
+  flex: none;
+}
+.demo-hint__close:hover {
+  color: var(--ink);
+  background: rgba(60, 52, 40, 0.06);
+}
+
+@media (max-width: 760px) {
+  .status-cluster {
+    display: none;
+  }
+  .demo-hint {
+    bottom: 90px;
+    flex-wrap: wrap;
+  }
+  .demo-hint__text {
+    flex: 1;
+  }
+  .demo-hint__text span {
+    display: none;
+  }
+}

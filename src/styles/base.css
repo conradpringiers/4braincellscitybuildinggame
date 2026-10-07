@@ -1,0 +1,293 @@
+@import './tokens.css';
+
+/* ============================================================
+   Reset
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+:focus-visible {
+  outline: 2.5px solid var(--teal-deep);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+::selection {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+/* Scrollbars — slim, paper-toned */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--paper-3) transparent;
+}
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #ded4c2;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #cfc2aa;
+  background-clip: content-box;
+}
+
+/* ============================================================
+   Type helpers
+   ============================================================ */
+.eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: var(--sh-sm);
+  border: 1px solid rgba(60, 52, 40, 0.07);
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    background 0.18s var(--ease);
+  white-space: nowrap;
+}
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--sh-md);
+}
+.btn:active {
+  transform: translateY(0);
+  box-shadow: var(--sh-xs);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--sh-xs);
+}
+
+.btn--primary {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+.btn--primary:hover {
+  background: #23262b;
+}
+
+.btn--sage {
+  background: var(--sage-deep);
+  color: #fff;
+  border-color: var(--sage-deep);
+}
+.btn--sage:hover {
+  background: #6d9a66;
+}
+
+.btn--teal {
+  background: var(--teal-deep);
+  color: #fff;
+  border-color: var(--teal-deep);
+}
+
+.btn--ghost {
+  background: transparent;
+  box-shadow: none;
+  border-color: transparent;
+  color: var(--ink-soft);
+}
+.btn--ghost:hover {
+  background: rgba(60, 52, 40, 0.05);
+  box-shadow: none;
+  transform: none;
+}
+
+.btn--sm {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* ============================================================
+   Chips / pills
+   ============================================================ */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: var(--r-pill);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--card-sunk);
+  color: var(--ink-soft);
+  border: 1px solid rgba(60, 52, 40, 0.06);
+  white-space: nowrap;
+}
+.chip--sage {
+  background: var(--sage-pale);
+  color: #4f7049;
+}
+.chip--teal {
+  background: var(--teal-pale);
+  color: #3f6f69;
+}
+.chip--blue {
+  background: var(--blue-pale);
+  color: #43678c;
+}
+.chip--orange {
+  background: var(--orange-pale);
+  color: #96551f;
+}
+.chip--yellow {
+  background: var(--yellow-pale);
+  color: #8a6a1c;
+}
+.chip--pink {
+  background: var(--pink-pale);
+  color: #9a5454;
+}
+
+/* ============================================================
+   Meters
+   ============================================================ */
+.meter {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(60, 52, 40, 0.09);
+  overflow: hidden;
+}
+.meter__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  transition: width 0.9s var(--ease);
+}
+.meter__fill--sage { background: linear-gradient(90deg, var(--sage), var(--sage-deep)); }
+.meter__fill--teal { background: linear-gradient(90deg, var(--teal), var(--teal-deep)); }
+.meter__fill--blue { background: linear-gradient(90deg, var(--blue), var(--blue-deep)); }
+.meter__fill--orange { background: linear-gradient(90deg, var(--orange), var(--orange-deep)); }
+.meter__fill--yellow { background: linear-gradient(90deg, var(--yellow), #e0b866); }
+.meter__fill--pink { background: linear-gradient(90deg, var(--pink), var(--pink-deep)); }
+.meter__fill--bad { background: linear-gradient(90deg, var(--bad), var(--bad-deep)); }
+
+/* ============================================================
+   Shared "paper card" surface
+   ============================================================ */
+.paper {
+  background: var(--card);
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(60, 52, 40, 0.07);
+  box-shadow: var(--sh-md);
+}
+
+/* Divider */
+.rule {
+  height: 1px;
+  background: rgba(60, 52, 40, 0.09);
+  border: none;
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+.stack { display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; }
+.between { display: flex; align-items: center; justify-content: space-between; }
+.wrap { flex-wrap: wrap; }
+.grow { flex: 1; }
+.muted { color: var(--ink-soft); }
+.faint { color: var(--ink-faint); }
+.center { text-align: center; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.92); }
+  60% { opacity: 1; transform: scale(1.02); }
+  100% { transform: scale(1); }
+}

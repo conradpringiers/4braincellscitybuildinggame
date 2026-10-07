@@ -1,0 +1,79 @@
+/* ============================================================
+   URBLOOM — design tokens
+   Minimalist paper pastel city builder
+   ============================================================ */
+
+:root {
+  /* --- Surfaces (warm paper) --- */
+  --paper: #f6f1e7;
+  --paper-2: #f1eadc;
+  --paper-3: #eae1d1;
+  --card: #fffdf8;
+  --card-sunk: #f8f3e9;
+
+  /* --- Ink --- */
+  --ink: #2f3238;
+  --ink-soft: #5b5f68;
+  --ink-faint: #8b8f98;
+  --ink-ghost: #b9bbb6;
+
+  /* --- Pastel city palette --- */
+  --sage: #a8c6a0;
+  --sage-deep: #7fa878;
+  --sage-pale: #d7e6cf;
+  --teal: #7fb7b0;
+  --teal-deep: #5c9a93;
+  --teal-pale: #d3e8e4;
+  --blue: #a9c6e2;
+  --blue-deep: #7ba3cc;
+  --blue-pale: #dbe8f5;
+  --orange: #e6a878;
+  --orange-deep: #cf8a55;
+  --orange-pale: #f6ddc6;
+  --yellow: #f0d493;
+  --yellow-pale: #f8ecc9;
+  --pink: #e9b7b7;
+  --pink-deep: #d28f8f;
+  --pink-pale: #f6dede;
+  --rose: #d98f9b;
+
+  /* --- City ground --- */
+  --grass: #dfead3;
+  --grass-deep: #cfe0bf;
+  --road: #d9d2c4;
+  --road-line: #fdfbf5;
+  --water: #bcd9e6;
+  --water-deep: #a4cadd;
+  --sand: #efe4cf;
+
+  /* --- Semantic --- */
+  --good: #7fa878;
+  --warn: #e0a95e;
+  --bad: #d98a7a;
+  --bad-deep: #c56f5e;
+
+  /* --- Shadows --- */
+  --sh-xs: 0 1px 2px rgba(60, 52, 40, 0.06);
+  --sh-sm: 0 2px 6px rgba(60, 52, 40, 0.08);
+  --sh-md: 0 8px 20px rgba(60, 52, 40, 0.1);
+  --sh-lg: 0 18px 44px rgba(60, 52, 40, 0.16);
+  --sh-xl: 0 30px 80px rgba(48, 42, 32, 0.24);
+  --sh-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  /* --- Radii --- */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 34px;
+  --r-pill: 999px;
+
+  /* --- Motion --- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- Type --- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+}

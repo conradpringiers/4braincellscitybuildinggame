@@ -1,0 +1,139 @@
+.dock {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  max-width: calc(100vw - 32px);
+  overflow-x: auto;
+  background: rgba(255, 253, 248, 0.86);
+  backdrop-filter: blur(16px) saturate(1.15);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  border: 1px solid rgba(60, 52, 40, 0.09);
+  border-radius: var(--r-xl);
+  box-shadow: var(--sh-lg);
+  scrollbar-width: none;
+}
+.dock::-webkit-scrollbar {
+  display: none;
+}
+
+.dock__list {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.dock__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 13px;
+  border-radius: var(--r-md);
+  color: var(--ink-soft);
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.dock__item:hover {
+  background: rgba(60, 52, 40, 0.05);
+  transform: translateY(-2px);
+}
+.dock__item.is-active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.dock__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+.dock__label {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.dock__badge {
+  position: absolute;
+  top: -5px;
+  right: -9px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--bad);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border: 2px solid var(--card);
+}
+.dock__item.is-active .dock__badge {
+  border-color: var(--ink);
+}
+
+.dock__rule {
+  width: 1px;
+  align-self: stretch;
+  margin: 6px 4px;
+  background: rgba(60, 52, 40, 0.1);
+}
+
+.dock__profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  border-radius: var(--r-pill);
+  transition: background 0.2s var(--ease);
+}
+.dock__profile:hover {
+  background: rgba(60, 52, 40, 0.05);
+}
+.dock__profile.is-active {
+  background: var(--sage-pale);
+}
+.dock__avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(145deg, var(--sage), var(--sage-deep));
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: var(--sh-xs);
+}
+.dock__profile-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  text-align: left;
+}
+.dock__profile-name {
+  font-size: 13px;
+  font-weight: 700;
+}
+.dock__profile-score {
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .dock__label,
+  .dock__profile-meta {
+    display: none;
+  }
+  .dock__item {
+    padding: 9px 14px;
+  }
+  .dock__profile {
+    padding: 6px;
+  }
+}
