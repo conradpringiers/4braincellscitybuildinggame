@@ -20,9 +20,7 @@ function ChallengeProgress({ c }: { c: Challenge }) {
           className="prog__fill"
           style={{
             width: `${pct}%`,
-            background: c.completed
-              ? 'linear-gradient(90deg, var(--sage), var(--sage-deep))'
-              : 'linear-gradient(90deg, var(--teal), var(--teal-deep))',
+            backgroundColor: c.completed ? 'var(--sage)' : 'var(--teal)',
           }}
         />
       </div>
@@ -45,7 +43,6 @@ export default function ChallengesView() {
     >
       {/* ---------- today's challenge ---------- */}
       <div className={`today ${todays.completed ? 'is-complete' : ''}`}>
-        <div className="today__glow" />
         <div className="today__head">
           <span className="today__icon">{todays.icon}</span>
           <div className="today__id">
@@ -80,7 +77,7 @@ export default function ChallengesView() {
           <div className="today__foot">
             <div className="today__people">
               <span className="today__avatars">
-                {['#7fa878', '#cf8a55', '#7fb7b0', '#7ba3cc'].map((col, i) => (
+                {['#56A867', '#DC8A4C', '#3AA091', '#6C90E0'].map((col, i) => (
                   <span key={i} className="today__avatar" style={{ background: col }} />
                 ))}
               </span>

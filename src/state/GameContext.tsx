@@ -256,7 +256,7 @@ function reducer(state: GameState, action: Action): GameState {
         id: `me-${Date.now()}`,
         author: 'You',
         initials: 'C',
-        color: '#2f3238',
+        color: '#2B2740',
         text,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         mine: true,

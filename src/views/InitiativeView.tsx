@@ -8,7 +8,7 @@ import './InitiativeView.css'
 
 const LETTERS = ['A', 'B', 'C', 'D']
 
-const OPTION_COLORS = ['#7fb7b0', '#cf8a55', '#7fa878', '#7ba3cc']
+const OPTION_COLORS = ['#7ED3C6', '#F6B482', '#9ED9A6', '#A9C3F2']
 
 export default function InitiativeView() {
   const { state, closeSheet, castVote, openInitiative } = useGame()
@@ -84,7 +84,7 @@ export default function InitiativeView() {
               <Icon name="check" size={34} />
             </span>
           </div>
-          <span className="eyebrow" style={{ color: '#4f7049' }}>
+          <span className="eyebrow" style={{ color: '#2F7A48' }}>
             Decision recorded
           </span>
           <h2 className="display passreveal__title">{chosen?.title} approved</h2>

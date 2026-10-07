@@ -3,6 +3,7 @@ import CityMap from './components/CityMap'
 import TopBar from './components/TopBar'
 import NavDock from './components/NavDock'
 import Toasts from './components/Toasts'
+import MobilePanel from './components/MobilePanel'
 import { Icon } from './components/Icon'
 import { useGame } from './state/GameContext'
 import IssuesView from './views/IssuesView'
@@ -76,7 +77,7 @@ export default function App() {
           <span className="demo-hint__emoji">👋</span>
           <div className="demo-hint__text">
             <strong>Start the demo</strong>
-            <span>Tap the TRAFFIC CRISIS marker on the map to open the tram initiative.</span>
+            <span>Open the TRAFFIC CRISIS issue to launch the tram initiative.</span>
           </div>
           <button className="btn btn--sm btn--primary" onClick={() => openProblem('traffic')}>
             Open issue
@@ -89,6 +90,9 @@ export default function App() {
 
       {/* ---------- navigation ---------- */}
       <NavDock />
+
+      {/* ---------- mobile companions (hidden on desktop) ---------- */}
+      <MobilePanel />
 
       {/* ---------- overlays ---------- */}
       {state.view === 'issues' && <IssuesView />}

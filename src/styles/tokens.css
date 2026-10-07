@@ -1,79 +1,82 @@
 /* ============================================================
    URBLOOM — design tokens
-   Minimalist paper pastel city builder
+   Modern pixel-pastel · pixel display type + IBM Plex
    ============================================================ */
 
 :root {
   /* --- Surfaces (warm paper) --- */
-  --paper: #f6f1e7;
-  --paper-2: #f1eadc;
-  --paper-3: #eae1d1;
-  --card: #fffdf8;
-  --card-sunk: #f8f3e9;
+  --paper: #f7f1e6;
+  --paper-2: #efe6d6;
+  --paper-3: #e3d7c2;
+  --card: #fffdf6;
+  --card-sunk: #f2eadb;
 
-  /* --- Ink --- */
-  --ink: #2f3238;
-  --ink-soft: #5b5f68;
-  --ink-faint: #8b8f98;
-  --ink-ghost: #b9bbb6;
+  /* --- Ink (indigo charcoal for crisp pixel outlines) --- */
+  --ink: #2b2740;
+  --ink-soft: #57506e;
+  --ink-faint: #8b83a3;
+  --ink-ghost: #bcb4cb;
+  --line: #2b2740;
 
   /* --- Pastel city palette --- */
-  --sage: #a8c6a0;
-  --sage-deep: #7fa878;
-  --sage-pale: #d7e6cf;
-  --teal: #7fb7b0;
-  --teal-deep: #5c9a93;
-  --teal-pale: #d3e8e4;
-  --blue: #a9c6e2;
-  --blue-deep: #7ba3cc;
-  --blue-pale: #dbe8f5;
-  --orange: #e6a878;
-  --orange-deep: #cf8a55;
-  --orange-pale: #f6ddc6;
-  --yellow: #f0d493;
-  --yellow-pale: #f8ecc9;
-  --pink: #e9b7b7;
-  --pink-deep: #d28f8f;
-  --pink-pale: #f6dede;
-  --rose: #d98f9b;
+  --sage: #9ed9a6;
+  --sage-deep: #56a867;
+  --sage-pale: #d9f1da;
+  --teal: #7ed3c6;
+  --teal-deep: #3aa091;
+  --teal-pale: #cdf0e8;
+  --blue: #a9c3f2;
+  --blue-deep: #6c90e0;
+  --blue-pale: #dce6fb;
+  --orange: #f6b482;
+  --orange-deep: #dc8a4c;
+  --orange-pale: #fce3cc;
+  --yellow: #f4d97c;
+  --yellow-deep: #d6b83c;
+  --yellow-pale: #fbefc4;
+  --pink: #f0a6b8;
+  --pink-deep: #da7a93;
+  --pink-pale: #fbdce4;
+  --lavender: #c8b6e8;
+  --lavender-pale: #e6ddf8;
 
-  /* --- City ground --- */
-  --grass: #dfead3;
-  --grass-deep: #cfe0bf;
-  --road: #d9d2c4;
-  --road-line: #fdfbf5;
-  --water: #bcd9e6;
-  --water-deep: #a4cadd;
-  --sand: #efe4cf;
+  /* --- City ground (kept for any future vector layers) --- */
+  --grass: #d9f1da;
+  --road: #dcd3c2;
+  --water: #cdf0e8;
 
   /* --- Semantic --- */
-  --good: #7fa878;
-  --warn: #e0a95e;
-  --bad: #d98a7a;
-  --bad-deep: #c56f5e;
+  --good: #56a867;
+  --warn: #dc8a4c;
+  --bad: #da7a93;
 
-  /* --- Shadows --- */
-  --sh-xs: 0 1px 2px rgba(60, 52, 40, 0.06);
-  --sh-sm: 0 2px 6px rgba(60, 52, 40, 0.08);
-  --sh-md: 0 8px 20px rgba(60, 52, 40, 0.1);
-  --sh-lg: 0 18px 44px rgba(60, 52, 40, 0.16);
-  --sh-xl: 0 30px 80px rgba(48, 42, 32, 0.24);
-  --sh-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  /* --- Hard "pixel" shadows (no blur) --- */
+  --sh-c: #2b2740;
+  --sh-xs: 2px 2px 0 var(--sh-c);
+  --sh-sm: 3px 3px 0 var(--sh-c);
+  --sh-md: 4px 4px 0 var(--sh-c);
+  --sh-lg: 6px 6px 0 var(--sh-c);
+  --sh-xl: 8px 8px 0 var(--sh-c);
+  --sh-inset: inset 0 0 0 2px var(--sh-c);
 
-  /* --- Radii --- */
-  --r-xs: 8px;
-  --r-sm: 12px;
-  --r-md: 18px;
-  --r-lg: 26px;
-  --r-xl: 34px;
-  --r-pill: 999px;
+  /* --- Radii (small + blocky) --- */
+  --r-xs: 3px;
+  --r-sm: 5px;
+  --r-md: 7px;
+  --r-lg: 10px;
+  --r-xl: 14px;
+  --r-pill: 6px;
+
+  /* --- Borders --- */
+  --bw: 2px;
+  --border: var(--bw) solid var(--ink);
 
   /* --- Motion --- */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   /* --- Type --- */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Helvetica, Arial, sans-serif;
-  --font-display: 'Fraunces', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-display: 'Pixelify Sans', 'IBM Plex Mono', ui-monospace, monospace;
+  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }

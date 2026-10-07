@@ -6,15 +6,15 @@
 }
 
 .app--dimmed .citymap {
-  transition: filter 0.4s var(--ease);
-  filter: saturate(0.92);
+  transition: filter 0.35s var(--ease);
+  filter: saturate(0.9);
 }
 
 /* ---------- bottom-left status cluster ---------- */
 .status-cluster {
   position: absolute;
-  left: 22px;
-  bottom: 22px;
+  left: 16px;
+  bottom: 16px;
   z-index: 30;
   display: flex;
   gap: 10px;
@@ -22,27 +22,30 @@
 .status {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 15px 10px 12px;
+  gap: 9px;
+  padding: 9px 13px;
 }
 .status__icon {
-  font-size: 18px;
+  font-size: 17px;
 }
 .status__meta {
   display: flex;
   flex-direction: column;
-  line-height: 1.05;
+  line-height: 1;
 }
 .status__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 .status__value {
-  font-size: 16px;
+  font-family: var(--font-display);
+  font-size: 18px;
   font-weight: 700;
+  margin-top: 3px;
   color: var(--ink);
 }
 
@@ -50,21 +53,19 @@
 .demo-hint {
   position: absolute;
   left: 50%;
-  bottom: 108px;
+  bottom: 106px;
   transform: translateX(-50%);
   z-index: 35;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px 12px 16px;
-  max-width: min(620px, calc(100vw - 44px));
-  background: rgba(255, 253, 248, 0.95);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  border: 1px solid rgba(60, 52, 40, 0.1);
+  gap: 13px;
+  padding: 12px 13px 12px 15px;
+  max-width: min(640px, calc(100vw - 32px));
+  background: var(--card);
+  border: var(--border);
   border-radius: var(--r-lg);
   box-shadow: var(--sh-lg);
-  animation: riseIn 0.6s var(--ease) 0.3s both;
+  animation: riseIn 0.5s var(--ease) 0.25s both;
 }
 .demo-hint__emoji {
   font-size: 24px;
@@ -72,11 +73,15 @@
 .demo-hint__text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 .demo-hint__text strong {
-  font-size: 13.5px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 .demo-hint__text span {
   font-size: 12.5px;
@@ -88,27 +93,112 @@
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 999px;
-  color: var(--ink-ghost);
+  border-radius: var(--r-xs);
+  color: var(--ink-faint);
   flex: none;
 }
 .demo-hint__close:hover {
   color: var(--ink);
-  background: rgba(60, 52, 40, 0.06);
+  background: var(--paper-2);
 }
 
-@media (max-width: 760px) {
+/* ---------- mobile ---------- */
+@media (max-width: 900px) {
   .status-cluster {
     display: none;
   }
+}
+
+@media (max-width: 720px) {
   .demo-hint {
-    bottom: 90px;
+    left: 10px;
+    right: 10px;
+    bottom: 84px;
+    transform: none;
+    max-width: none;
     flex-wrap: wrap;
+    padding: 11px 12px;
   }
   .demo-hint__text {
     flex: 1;
   }
   .demo-hint__text span {
     display: none;
+  }
+  .demo-hint .btn {
+    width: 100%;
+  }
+  .demo-hint__close {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+  }
+}
+
+/* ============================================================
+   Mobile layout — the city becomes a framed board on top,
+   with an attention list + feed scrolling underneath.
+   ============================================================ */
+@media (max-width: 720px) {
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+  }
+
+  .app .topbar {
+    position: static;
+    order: 1;
+  }
+
+  .app .demo-hint {
+    position: relative;
+    order: 2;
+    transform: none;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    margin: 10px 10px 0;
+    max-width: none;
+    flex-wrap: nowrap;
+    animation: none;
+  }
+  .app .demo-hint__text {
+    min-width: 0;
+  }
+  .app .demo-hint .btn {
+    width: auto;
+  }
+  .app .demo-hint__close {
+    display: none;
+  }
+
+  .app .citymap {
+    position: relative;
+    order: 3;
+    flex: 0 0 auto;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    margin-top: 10px;
+    border-top: var(--border);
+    border-bottom: var(--border);
+    background: var(--paper-2);
+  }
+
+  /* markers scale down with the board, so they live in the list instead */
+  .app .citymap .pin,
+  .app .citymap .overlay-tag {
+    display: none;
+  }
+
+  .app .mobile-panel {
+    order: 4;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .app .dock {
+    position: static;
+    order: 5;
   }
 }

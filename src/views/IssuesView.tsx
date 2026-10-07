@@ -92,13 +92,13 @@ export default function IssuesView() {
         <div className="vcard" style={{ background: 'var(--sage-pale)', borderColor: 'transparent' }}>
           <div className="flex-between flex-wrap" style={{ gap: 14 }}>
             <div className="stack-sm" style={{ gap: 4, maxWidth: '58ch' }}>
-              <span className="eyebrow" style={{ color: '#4f7049' }}>
+              <span className="eyebrow" style={{ color: '#2F7A48' }}>
                 How it works
               </span>
               <strong style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>
                 Growth creates problems. Citizens solve them together.
               </strong>
-              <span className="hint" style={{ color: '#5c7a56' }}>
+              <span className="hint" style={{ color: '#3F6B48' }}>
                 Every issue opens an initiative. Parties take positions, citizens vote, and the
                 winning policy changes the city's indicators on the map.
               </span>

@@ -43,7 +43,7 @@ export default function PartiesView() {
           })}
         </aside>
 
-        <section className="party-detail vcard" style={{ borderTop: `4px solid ${party.color}` }}>
+        <section className="party-detail vcard" style={{ borderTop: `6px solid ${party.color}` }}>
           <header className="party-detail__head">
             <span className="crest" style={{ background: party.colorSoft, color: party.accent }}>
               {party.mark}

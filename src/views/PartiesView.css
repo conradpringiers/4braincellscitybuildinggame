@@ -1,6 +1,6 @@
 .party-layout {
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
+  grid-template-columns: 290px minmax(0, 1fr);
   gap: 18px;
   align-items: start;
 }
@@ -14,99 +14,111 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  position: sticky;
-  top: 0;
+}
+@media (min-width: 821px) {
+  .party-list {
+    position: sticky;
+    top: 0;
+  }
 }
 .party-mini {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px;
+  gap: 11px;
+  padding: 12px;
   border-radius: var(--r-md);
   background: var(--card);
-  border: 1.5px solid rgba(60, 52, 40, 0.09);
+  border: var(--border);
   box-shadow: var(--sh-xs);
   text-align: left;
-  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 .party-mini:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sh-sm);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--sh-md);
 }
 .party-mini.is-active {
-  box-shadow: var(--sh-md);
+  box-shadow: 4px 4px 0 var(--sh-c);
 }
 .party-mini__meta {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
   flex: 1;
 }
 .party-mini__name {
+  font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 14.5px;
+  font-size: 13px;
 }
 .party-mini__pop {
-  font-size: 11.5px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   color: var(--ink-faint);
   font-weight: 600;
 }
 .party-mini__you {
-  font-size: 10px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #4f7049;
+  color: #2f7a48;
   background: var(--sage-pale);
-  padding: 3px 8px;
-  border-radius: 999px;
+  border: 2px solid #9ed9a6;
+  padding: 2px 7px;
+  border-radius: var(--r-xs);
 }
 
 /* crest */
 .crest {
   display: grid;
   place-items: center;
-  width: 62px;
-  height: 62px;
-  border-radius: 20px;
-  font-size: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--r-md);
+  font-size: 28px;
   flex: none;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.05);
+  border: 2px solid var(--ink);
+  box-shadow: var(--sh-xs);
 }
 .crest--sm {
   width: 42px;
   height: 42px;
-  border-radius: 13px;
-  font-size: 20px;
+  border-radius: var(--r-sm);
+  font-size: 19px;
+  box-shadow: none;
 }
 
 /* detail */
 .party-detail {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  padding: 24px;
+  gap: 20px;
+  padding: 22px;
+  border-top-width: 6px;
+  border-top-style: solid;
 }
 .party-detail__head {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  gap: 15px;
   flex-wrap: wrap;
 }
 .party-detail__id {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 7px;
+  gap: 8px;
   flex: 1;
   min-width: 200px;
 }
 .party-detail__name {
-  font-size: 30px;
+  font-size: 32px;
 }
 .party-detail__tag {
-  font-size: 14px;
+  font-size: 13.5px;
   font-style: italic;
   color: var(--ink-soft);
 }
@@ -122,20 +134,23 @@
 .pstat-block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 16px;
+  gap: 7px;
+  padding: 15px;
   border-radius: var(--r-md);
   background: var(--card-sunk);
+  border: 2px solid rgba(43, 39, 64, 0.16);
 }
 .pstat-block__num {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-size: 26px;
   font-weight: 700;
+  line-height: 1;
 }
 .pstat-block__label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
@@ -146,7 +161,7 @@
 }
 
 .party-manifesto {
-  font-size: 15px;
+  font-size: 14.5px;
   line-height: 1.65;
   color: var(--ink);
 }
@@ -159,16 +174,19 @@
 .priority {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: var(--r-md);
+  gap: 9px;
+  padding: 11px 13px;
+  border-radius: var(--r-sm);
+  border: 2px solid var(--ink);
 }
 .priority__icon {
-  font-size: 18px;
+  font-size: 17px;
 }
 .priority__label {
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
   font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .party-detail__foot {
@@ -177,6 +195,6 @@
   justify-content: space-between;
   gap: 14px;
   flex-wrap: wrap;
-  padding-top: 18px;
-  border-top: 1px solid rgba(60, 52, 40, 0.08);
+  padding-top: 16px;
+  border-top: 2px solid rgba(43, 39, 64, 0.14);
 }

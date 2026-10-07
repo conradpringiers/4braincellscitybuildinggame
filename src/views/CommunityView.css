@@ -1,7 +1,7 @@
 .community {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: 22px;
+  gap: 20px;
   align-items: start;
 }
 @media (max-width: 860px) {
@@ -20,64 +20,76 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 11.5px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #b06a4a;
+  color: #a9622b;
 }
 .live-dot__dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
   border-radius: 999px;
   background: var(--orange-deep);
+  border: 2px solid var(--ink);
   animation: livePulse 1.8s var(--ease-in-out) infinite;
 }
 @keyframes livePulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
+  50% { opacity: 0.35; transform: scale(0.7); }
 }
 
 .attention {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: var(--r-md);
+  gap: 11px;
+  padding: 11px 13px;
+  border-radius: var(--r-sm);
   background: var(--card);
-  border: 1px solid rgba(60, 52, 40, 0.08);
+  border: var(--border);
+  box-shadow: var(--sh-xs);
   text-align: left;
-  transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 .attention:hover {
   transform: translateX(3px);
-  background: var(--card-sunk);
+  box-shadow: var(--sh-sm);
 }
 .attention__title {
-  font-size: 13.5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .attention__metric {
   margin-left: auto;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--ink-faint);
   font-weight: 600;
   white-space: nowrap;
 }
 .attention svg {
-  color: var(--ink-ghost);
+  color: var(--ink-faint);
   flex: none;
 }
 
 .community__chat {
-  padding: 18px;
+  padding: 16px;
   height: 560px;
   display: flex;
   flex-direction: column;
 }
 @media (max-width: 860px) {
   .community__chat {
-    height: 520px;
+    height: auto;
+    min-height: 460px;
   }
 }

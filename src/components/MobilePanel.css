@@ -1,0 +1,14 @@
+.mobile-panel {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .mobile-panel {
+    display: block;
+    padding: 16px 14px 20px;
+    background: var(--paper-2);
+    border-top: var(--border);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

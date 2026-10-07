@@ -13,17 +13,35 @@
   display: block;
 }
 
-/* soft paper vignette so UI floating on top reads well */
+.citymap__fallback {
+  font-family: var(--font-mono);
+}
+
+/* soft paper vignette so HUD & panels on top read well */
 .citymap__vignette {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(120% 90% at 50% 42%, transparent 56%, rgba(72, 62, 46, 0.14) 100%),
-    linear-gradient(180deg, rgba(255, 253, 248, 0.5) 0%, transparent 16%, transparent 78%, rgba(72, 62, 46, 0.1) 100%);
+    radial-gradient(125% 95% at 50% 40%, transparent 60%, rgba(43, 39, 64, 0.16) 100%),
+    linear-gradient(
+      180deg,
+      rgba(247, 241, 230, 0.55) 0%,
+      transparent 18%,
+      transparent 76%,
+      rgba(43, 39, 64, 0.12) 100%
+    );
 }
 
 /* ---------- problem pins ---------- */
+.pin__title {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.pin__metric {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
 .pin--problem {
   cursor: pointer;
 }
@@ -39,10 +57,9 @@
   animation-delay: 1.3s;
 }
 .pin__card {
-  filter: drop-shadow(0 8px 14px rgba(60, 52, 40, 0.18));
-  transition: transform 0.22s var(--ease);
   transform-box: fill-box;
   transform-origin: bottom center;
+  transition: transform 0.2s var(--ease);
 }
 .pin--problem:hover .pin__card {
   transform: translateY(-4px);
@@ -57,60 +74,56 @@
 @keyframes pinPulse {
   0% {
     transform: scale(0.5);
-    opacity: 0.45;
+    opacity: 0.5;
   }
   70% {
-    transform: scale(1.7);
+    transform: scale(1.8);
     opacity: 0;
   }
   100% {
-    transform: scale(1.7);
+    transform: scale(1.8);
     opacity: 0;
   }
 }
 
+/* ---------- overlay tags ---------- */
+.overlay-tag text {
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
 /* ---------- tram ---------- */
-.tram {
-  animation: fadeIn 0.8s var(--ease) both;
+.overlay-tram {
+  animation: fadeIn 0.7s var(--ease) both;
 }
 .tram__car {
   animation: tramRun 11s linear infinite;
 }
 @keyframes tramRun {
-  0% { transform: translate(470px, 760px) rotate(0deg); opacity: 0; }
+  0% { transform: translate(470px, 760px); opacity: 0; }
   6% { opacity: 1; }
-  25% { transform: translate(640px, 620px) rotate(0deg); }
-  50% { transform: translate(900px, 430px) rotate(0deg); }
-  75% { transform: translate(970px, 330px) rotate(0deg); }
+  25% { transform: translate(640px, 620px); }
+  50% { transform: translate(900px, 430px); }
+  75% { transform: translate(970px, 330px); }
   94% { opacity: 1; }
-  100% { transform: translate(1120px, 210px) rotate(0deg); opacity: 0; }
+  100% { transform: translate(1120px, 210px); opacity: 0; }
 }
 
-/* ---------- unlock / growth reveal ---------- */
-.unlock--park,
-.growth {
+/* ---------- unlock / growth reveals ---------- */
+.overlay-unlock,
+.overlay-growth {
   transform-box: fill-box;
   transform-origin: center;
-  animation: bloom 1s var(--ease) both;
+  animation: bloom 0.9s var(--ease) both;
 }
-.growth {
-  animation-delay: 0.1s;
-}
+
 @keyframes bloom {
   0% {
     opacity: 0;
-    transform: scale(0.82);
+    transform: scale(0.84);
   }
   100% {
     opacity: 1;
     transform: scale(1);
   }
-}
-
-.maplabels text {
-  font-family: var(--font-sans);
-  paint-order: stroke;
-  stroke: rgba(255, 253, 248, 0.55);
-  stroke-width: 3px;
-  stroke-linejoin: round;
 }
