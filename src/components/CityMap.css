@@ -3,6 +3,26 @@
   inset: 0;
   overflow: hidden;
   background: var(--paper-2);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* pan/zoom is a pointer affordance — don't trap touch scrolling on phones */
+@media (min-width: 721px) {
+  .citymap {
+    touch-action: none;
+    overscroll-behavior: contain;
+  }
+}
+.citymap.is-zoomed {
+  cursor: grab;
+}
+.citymap.is-dragging {
+  cursor: grabbing;
+}
+.citymap.is-dragging .pin,
+.citymap.is-dragging .pin__card {
+  pointer-events: none;
 }
 
 .citymap__svg {
@@ -52,7 +72,75 @@
   }
 }
 
-/* ---------- problem pins ---------- */
+/* ---------- zoom controls ---------- */
+.zoomctl {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 28;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  background: var(--card);
+  border: var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-md);
+  animation: riseIn 0.5s var(--ease) 0.35s backwards;
+}
+.zoomctl__btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-xs);
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 2px solid transparent;
+  transition: background 0.14s var(--ease), transform 0.12s var(--ease);
+}
+.zoomctl__btn:hover {
+  background: var(--yellow-pale);
+}
+.zoomctl__btn:active {
+  transform: translate(1px, 1px);
+}
+.zoomctl__btn:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+.zoomctl__btn--reset {
+  font-size: 15px;
+}
+
+.citymap__zoomread {
+  position: absolute;
+  right: 18px;
+  top: calc(50% + 80px);
+  z-index: 28;
+  padding: 3px 7px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--card);
+  border: 2px solid var(--ink);
+  border-radius: var(--r-xs);
+  animation: fadeIn 0.25s var(--ease) both;
+}
+
+/* the map is a postcard on phones — pan/zoom stays pointer-only */
+@media (max-width: 720px) {
+  .zoomctl,
+  .citymap__zoomread {
+    display: none;
+  }
+}
 .pin__title {
   font-family: var(--font-mono);
   font-weight: 700;

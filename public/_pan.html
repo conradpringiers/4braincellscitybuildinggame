@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>pan-test</title>
+    <style>
+      html,body{margin:0;background:#20222b}
+      iframe{width:1200px;height:800px;border:0;display:block}
+    </style>
+  </head>
+  <body>
+    <iframe id="f" src="/"></iframe>
+    <script>
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+      const f = document.getElementById('f')
+      const params = new URLSearchParams(location.search)
+
+      f.addEventListener('load', async () => {
+        await wait(900)
+        const d = f.contentDocument
+        const w = f.contentWindow
+        const map = d.querySelector('.citymap')
+        const svg = d.querySelector('.citymap__svg')
+        const r = map.getBoundingClientRect()
+        const log = []
+        const read = () => {
+          const m = /translate3d\(([-\d.]+)px, ([-\d.]+)px.*scale\(([\d.]+)\)/.exec(svg.style.transform)
+          return m ? { x: +m[1], y: +m[2], s: +m[3] } : svg.style.transform
+        }
+
+        const wheel = (dy, x, y) =>
+          map.dispatchEvent(
+            new w.WheelEvent('wheel', {
+              deltaY: dy,
+              clientX: r.left + x,
+              clientY: r.top + y,
+              bubbles: true,
+              cancelable: true,
+            }),
+          )
+
+        const pd = (type, x, y, buttons) =>
+          map.dispatchEvent(
+            new w.PointerEvent(type, {
+              pointerId: 1,
+              pointerType: 'mouse',
+              button: 0,
+              buttons,
+              clientX: r.left + x,
+              clientY: r.top + y,
+              bubbles: true,
+              cancelable: true,
+            }),
+          )
+
+        // 1. zoom in at a point
+        const cx = 300
+        const cy = 250
+        wheel(-500, cx, cy)
+        await wait(300)
+        log.push({ step: 'zoomIn', ...read() })
+
+        // 2. zoom out beyond the minimum
+        for (let i = 0; i < 6; i++) {
+          wheel(500, cx, cy)
+          await wait(30)
+        }
+        await wait(300)
+        log.push({ step: 'zoomOutClamp', ...read() })
+
+        // 3. zoom back in, then pan
+        for (let i = 0; i < 5; i++) {
+          wheel(-400, 600, 400)
+          await wait(30)
+        }
+        await wait(300)
+        log.push({ step: 'zoomed', ...read() })
+
+        pd('pointerdown', 600, 400, 1)
+        pd('pointermove', 750, 480, 1)
+        pd('pointermove', 900, 560, 1)
+        pd('pointerup', 900, 560, 0)
+        await wait(300)
+        log.push({ step: 'panned', ...read() })
+
+        // 4. pan hard to test the clamp
+        pd('pointerdown', 900, 560, 1)
+        pd('pointermove', 1600, 1200, 1)
+        pd('pointerup', 1600, 1200, 0)
+        await wait(300)
+        log.push({ step: 'panClamped', ...read() })
+
+        document.title = 'T ' + JSON.stringify({ log, sheet: !!d.querySelector('.sheet') })
+      })
+    </script>
+  </body>
+</html>
