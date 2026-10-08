@@ -19,6 +19,7 @@ function IndicatorStat({
 }) {
   const prev = useRef(value)
   const [delta, setDelta] = useState<number | null>(null)
+  const shown = useCountUp(value, 750)
 
   useEffect(() => {
     if (prev.current === value) return
@@ -36,7 +37,7 @@ function IndicatorStat({
       </span>
       <span className="stat__meta">
         <span className="stat__label">{label}</span>
-        <span className="stat__value num">{value}</span>
+        <span className="stat__value num">{Math.round(shown)}</span>
       </span>
       {delta !== null && (
         <span className={`stat__delta ${delta > 0 ? 'is-up' : 'is-down'}`} key={`${label}-${value}`}>

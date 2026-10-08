@@ -33,6 +33,25 @@
     );
 }
 
+/* ---------- congestion heat zone ---------- */
+.overlay-congestion {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: congestionBreathe 5.5s var(--ease-in-out) infinite;
+}
+
+@keyframes congestionBreathe {
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(0.965);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
 /* ---------- problem pins ---------- */
 .pin__title {
   font-family: var(--font-mono);

@@ -198,3 +198,47 @@
   padding-top: 16px;
   border-top: 2px solid rgba(43, 39, 64, 0.14);
 }
+
+.party-detail__chips {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.party-mini__gov {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #8a6d16;
+  background: var(--yellow-pale);
+  border: 2px solid var(--yellow-deep);
+  padding: 2px 6px;
+  border-radius: var(--r-xs);
+}
+
+/* the slightly hidden door to the deputy desk */
+.hq-door {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 7px 11px;
+  border-radius: var(--r-sm);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-ghost);
+  border: 2px dashed rgba(43, 39, 64, 0.2);
+  background: transparent;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.hq-door:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+  background: var(--card-sunk);
+}

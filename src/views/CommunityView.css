@@ -50,7 +50,8 @@
   border: var(--border);
   box-shadow: var(--sh-xs);
   text-align: left;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform 0.14s var(--ease), box-shadow 0.14s var(--ease);
+  animation: riseIn 0.42s var(--ease) backwards;
 }
 .attention:hover {
   transform: translateX(3px);

@@ -26,6 +26,22 @@
   gap: 4px;
 }
 
+@media (min-width: 721px) {
+  .dock {
+    animation: dockIn 0.6s var(--ease) 0.25s both;
+  }
+}
+@keyframes dockIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 .dock__item {
   display: flex;
   flex-direction: column;
@@ -144,44 +160,69 @@
   }
 }
 
+/* ---------- phones: an even tab bar that can never collapse ---------- */
 @media (max-width: 720px) {
   .dock {
-    left: 0;
-    right: 0;
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 2px;
+    left: auto;
+    right: auto;
+    bottom: auto;
     transform: none;
-    bottom: 0;
     max-width: none;
+    padding: 9px 8px calc(9px + env(safe-area-inset-bottom, 0px));
+    border: none;
+    border-top: 2px solid var(--ink);
     border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
-    box-shadow: 0 -4px 0 var(--sh-c);
-    justify-content: space-between;
-    padding: 7px 8px calc(7px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -10px 24px rgba(43, 39, 64, 0.1);
+    overflow: visible;
+    scrollbar-width: auto;
   }
   .dock__list {
-    flex: 1;
-    justify-content: space-between;
+    display: contents;
+  }
+  .dock__list > li {
+    display: flex;
     min-width: 0;
-    gap: 2px;
+  }
+  .dock__item {
+    flex: 1;
+    padding: 6px 0;
+    gap: 0;
+    border-radius: var(--r-sm);
+  }
+  .dock__item .dock__icon svg {
+    width: 20px;
+    height: 20px;
   }
   .dock__label {
     display: none;
   }
-  .dock__item {
-    padding: 8px 7px;
-    gap: 2px;
-  }
   .dock__rule {
     display: none;
   }
+  .dock__badge {
+    top: -7px;
+    right: -8px;
+  }
+  .dock__item.is-active {
+    background: var(--ink);
+  }
   .dock__profile {
-    padding: 4px;
-    gap: 6px;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    align-items: center;
+  }
+  .dock__profile.is-active {
+    background: var(--sage-pale);
+    border-color: var(--sage-deep);
   }
   .dock__avatar {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
   }
 }

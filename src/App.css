@@ -5,9 +5,14 @@
   background: var(--paper);
 }
 
+/* the city gently recedes when a sheet opens */
 .app--dimmed .citymap {
-  transition: filter 0.35s var(--ease);
-  filter: saturate(0.9);
+  transition: filter 0.45s var(--ease), transform 0.6s var(--ease);
+  filter: saturate(0.9) brightness(0.97);
+  transform: scale(1.015);
+}
+.citymap {
+  transition: filter 0.45s var(--ease), transform 0.6s var(--ease);
 }
 
 /* ---------- bottom-left status cluster ---------- */
@@ -18,6 +23,7 @@
   z-index: 30;
   display: flex;
   gap: 10px;
+  animation: riseIn 0.55s var(--ease) 0.15s backwards;
 }
 .status {
   display: flex;
@@ -65,10 +71,28 @@
   border: var(--border);
   border-radius: var(--r-lg);
   box-shadow: var(--sh-lg);
-  animation: riseIn 0.5s var(--ease) 0.25s both;
+  animation: hintIn 0.6s var(--ease) 0.45s both;
+}
+@keyframes hintIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 .demo-hint__emoji {
   font-size: 24px;
+  animation: wave 2.6s var(--ease-in-out) 1s infinite;
+  transform-origin: 70% 80%;
+}
+@keyframes wave {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  70% { transform: rotate(16deg); }
+  80% { transform: rotate(-8deg); }
+  90% { transform: rotate(12deg); }
 }
 .demo-hint__text {
   display: flex;
@@ -102,58 +126,64 @@
   background: var(--paper-2);
 }
 
-/* ---------- mobile ---------- */
+/* ---------- the slightly hidden door to Party HQ ---------- */
+.hq-key {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 31;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-sm);
+  color: var(--ink-faint);
+  background: var(--card);
+  border: 2px dashed rgba(43, 39, 64, 0.28);
+  box-shadow: var(--sh-xs);
+  opacity: 0.42;
+  transition: opacity 0.2s var(--ease), transform 0.12s ease, color 0.2s ease,
+    box-shadow 0.12s ease, border-color 0.2s ease;
+}
+.hq-key:hover {
+  opacity: 1;
+  color: var(--ink);
+  border-color: var(--ink);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--sh-sm);
+}
+.hq-key:active {
+  transform: translate(1px, 1px);
+}
+
 @media (max-width: 900px) {
   .status-cluster {
     display: none;
   }
 }
 
-@media (max-width: 720px) {
-  .demo-hint {
-    left: 10px;
-    right: 10px;
-    bottom: 84px;
-    transform: none;
-    max-width: none;
-    flex-wrap: wrap;
-    padding: 11px 12px;
-  }
-  .demo-hint__text {
-    flex: 1;
-  }
-  .demo-hint__text span {
-    display: none;
-  }
-  .demo-hint .btn {
-    width: 100%;
-  }
-  .demo-hint__close {
-    position: absolute;
-    top: 6px;
-    right: 6px;
-  }
-}
-
 /* ============================================================
-   Mobile layout — the city becomes a framed board on top,
-   with an attention list + feed scrolling underneath.
+   Mobile — the city becomes a framed board on top, with an
+   attention list + feed scrolling underneath.
    ============================================================ */
 @media (max-width: 720px) {
   .app {
     display: flex;
     flex-direction: column;
     height: 100dvh;
+    min-height: 100dvh;
   }
 
   .app .topbar {
     position: static;
     order: 1;
+    flex: none;
   }
 
   .app .demo-hint {
     position: relative;
     order: 2;
+    flex: none;
     transform: none;
     left: auto;
     right: auto;
@@ -161,10 +191,16 @@
     margin: 10px 10px 0;
     max-width: none;
     flex-wrap: nowrap;
+    animation: riseIn 0.5s var(--ease) 0.15s backwards;
+  }
+  .app .demo-hint__emoji {
     animation: none;
   }
   .app .demo-hint__text {
     min-width: 0;
+  }
+  .app .demo-hint__text span {
+    display: none;
   }
   .app .demo-hint .btn {
     width: auto;
@@ -176,7 +212,7 @@
   .app .citymap {
     position: relative;
     order: 3;
-    flex: 0 0 auto;
+    flex: none;
     width: 100%;
     aspect-ratio: 16 / 10;
     margin-top: 10px;
@@ -200,5 +236,10 @@
   .app .dock {
     position: static;
     order: 5;
+    flex: none;
+  }
+
+  .hq-key {
+    display: none; /* the mobile panel already has a Deputy access row */
   }
 }

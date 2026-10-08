@@ -105,7 +105,10 @@ export default function ElectionView() {
               </span>
               <span className="result__body">
                 <span className="result__top">
-                  <span className="result__name">{p.name}</span>
+                  <span className="result__name">
+                    {p.name}
+                    {p.headOfGovernment && <span className="result__gov">Head of Gov.</span>}
+                  </span>
                   <span className="result__pct num">{p.popularity}%</span>
                 </span>
                 <span className="result__bar">

@@ -112,7 +112,7 @@
   background: var(--sage-pale);
   border: var(--border);
   box-shadow: var(--sh-sm);
-  animation: riseIn 0.4s var(--ease) both;
+  animation: riseIn 0.4s var(--ease) backwards;
   position: relative;
   flex-wrap: wrap;
 }
@@ -195,6 +195,7 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
+  animation: riseIn 0.42s var(--ease) backwards;
 }
 .chal__head {
   display: flex;

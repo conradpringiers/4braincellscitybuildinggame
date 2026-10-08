@@ -5,7 +5,7 @@ import '../components/views.css'
 import './ProfileView.css'
 
 export default function ProfileView() {
-  const { state, parties, closeSheet, openParty, openView, addCitizens } = useGame()
+  const { state, parties, closeSheet, openParty, openView, addCitizens, openPartyHq } = useGame()
   const p = state.profile
   const party = parties.find((x) => x.id === p.partyId)
   const earned = p.badges.filter((b) => b.earned).length
@@ -97,8 +97,8 @@ export default function ProfileView() {
               <button className="btn" onClick={() => openView('challenges')}>
                 <Icon name="leaf" size={16} /> Take a challenge
               </button>
-              <button className="btn" onClick={() => openView('initiatives')}>
-                <Icon name="scroll" size={16} /> Vote on an initiative
+              <button className="btn" onClick={() => openPartyHq()}>
+                <Icon name="key" size={16} /> Party HQ
               </button>
               <button className="btn" onClick={() => addCitizens(50)}>
                 <Icon name="plus" size={16} /> Invite citizens

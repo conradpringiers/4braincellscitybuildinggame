@@ -1,6 +1,7 @@
 import { useGame } from '../state/GameContext'
 import Sheet from '../components/Sheet'
 import { Icon } from '../components/Icon'
+import { stagger } from '../components/motion'
 import type { Challenge } from '../state/types'
 import '../components/views.css'
 import './ChallengesView.css'
@@ -124,9 +125,9 @@ export default function ChallengesView() {
           <span className="vsection__title--caps">More challenges</span>
           <span className="hint">Join to start contributing</span>
         </div>
-        <div className="grid-2">
-          {others.map((c) => (
-            <article key={c.id} className="chal vcard">
+        <div className="grid-2 stagger">
+          {others.map((c, i) => (
+            <article key={c.id} className="chal vcard" style={stagger(i)}>
               <div className="chal__head">
                 <span className="chal__icon">{c.icon}</span>
                 <div className="chal__id">

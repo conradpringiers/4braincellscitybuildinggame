@@ -28,6 +28,7 @@
   align-items: center;
   gap: 14px;
   padding: 8px 14px 8px 9px;
+  animation: riseIn 0.5s var(--ease) backwards;
 }
 
 .brand {
@@ -135,6 +136,7 @@
   gap: 2px;
   padding: 7px 9px;
   min-width: 0;
+  animation: riseIn 0.5s var(--ease) 0.08s backwards;
 }
 .stat {
   position: relative;
@@ -197,7 +199,7 @@
   padding: 2px 6px;
   border-radius: var(--r-xs);
   border: 2px solid var(--ink);
-  animation: riseIn 0.3s var(--ease) both;
+  animation: riseIn 0.3s var(--ease) backwards;
 }
 .stat__delta.is-up {
   color: #2f7a48;

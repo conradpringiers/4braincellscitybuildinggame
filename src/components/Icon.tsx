@@ -15,6 +15,14 @@ export type IconName =
   | 'check'
   | 'sparkle'
   | 'send'
+  | 'key'
+  | 'hammer'
+  | 'megaphone'
+  | 'users'
+  | 'coin'
+  | 'brain'
+  | 'clock'
+  | 'shield'
 
 const P: Record<IconName, string> = {
   city: 'M3 21h18M5 21V8l5-3v16M14 21V11l5-2v12M8 12h.01M8 16h.01M17 13h.01M17 17h.01',
@@ -31,6 +39,14 @@ const P: Record<IconName, string> = {
   check: 'M4 12l5 5L20 6',
   sparkle: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z',
   send: 'M4 12l16-8-6 16-3-6-7-2z',
+  key: 'M14 7a4 4 0 1 1 3.5 4L15 13.5l-1.5 1.5-1.5-1.5-1.5 1.5L9 13.5 7.5 15 4 11.5 8 7.5h6zM17 6h.01',
+  hammer: 'M14 7l3-3 4 4-3 3M13 8 4 17l3 3 9-9M11 4l4 4',
+  megaphone: 'M4 10v5h3l1 5h3l-1-5h2l7 4V5l-7 5H6zM19 9a3 3 0 0 1 0 6',
+  users: 'M9 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2 20c0-3.5 3.2-5.5 7-5.5s7 2 7 5.5M16 5.5a3.5 3.5 0 0 1 0 6.6M18 20c0-2.2-.6-3.8-1.6-4.9',
+  coin: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM14.5 9.5A3 3 0 1 0 12 15h1.5M12 7v10',
+  brain: 'M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5.8V16a3 3 0 0 0 4 2.8V4.8A3 3 0 0 0 9 4zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5.8V16a3 3 0 0 1-4 2.8V4.8A3 3 0 0 1 15 4zM12 4v16',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z',
 }
 
 interface IconProps extends SVGProps<SVGSVGElement> {

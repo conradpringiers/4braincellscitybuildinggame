@@ -2,60 +2,94 @@
 
 **One city. Everyone decides.**
 
-Urbloom is a frontend-only interactive prototype for a community city builder. The
-whole city belongs to a group of players: every new citizen is population growth,
-growth creates urban problems, and citizens solve them together through discussion,
-parties, initiatives and votes.
+Urbloom is a frontend-only prototype for a community city builder. The city of Civitas
+belongs to everyone: citizens arrive, the city grows, growth creates problems — and the
+**political parties decide how to fix them**.
 
-The goal is not to build the biggest city — it is to build one that is **prosperous,
-healthy, fair and sustainable**.
+You are not voting on three options. You are a **deputy**. You write a measure in plain
+language, and a policy analyst turns it into a real, costed, applied city intervention.
 
 > **Demo / prototype.** Fictional data, local state only. No backend, auth, database,
 > real multiplayer or real AI.
 
 ---
 
-## ⭐ Replacing the city artwork (read this first)
+## How it plays
 
-The city art is a **single image**. All the game logic, markers and overlays sit on top
-of it in a fixed coordinate space, so you can swap the art whenever you like.
+**Issues → Measures → Party HQ**
+
+- **Issues** — the city's live pressures (traffic, water, housing, pollution, energy,
+  health). Clicking a problem shows **details only**: severity, resolution progress, a
+  timeline of what happened, and the **measures already taken on it**. No option cards,
+  no public vote.
+- **Measures** — the dedicated record of everything the parties have done: sponsor,
+  cost, tags, projected indicator effects, the internal vote that carried it, and the
+  problem it targets. Filter by status or party.
+- **Parties** — each party has a leader, a **head of government** (the majority party),
+  a bench of **députés**, an **announcement feed**, their **measures**, and their
+  manifesto.
+- **Party HQ** (hidden — see below) — the deputy's desk: internal party chat, today's
+  agenda, the bench, the problem list, and the measure drafting room with the
+  **simulated policy analyst**.
+
+### The hidden door to Party HQ
+
+It's meant to be a little tucked away. Three ways in:
+
+1. 🔑 the faint **key button** bottom-right of the city screen,
+2. the keyboard shortcut **`H`**,
+3. the discreet **“Deputy access”** link at the bottom of a party page.
+
+### The policy analyst (simulated AI)
+
+In a real game an LLM would read the deputy's text and return a structured measure.
+Here `src/state/measureAI.ts` fakes it deterministically with keyword heuristics, in
+four visible stages (*parsing → classifying → estimating → cross-checking*):
+
+```
+"Build a tram line linking the garden district to downtown, with trees along the corridor"
+        ↓
+  Mobility / Environment / Housing
+  mobility +15 · environment +19 · happiness +11 · cost 820
+  confidence 98% · structural change: adds a transit line to the city model
+```
+
+If the text names no sector, the analyst falls back to the problem you're addressing.
+Adopting the measure runs an internal party vote, applies the indicator changes, advances
+the problem's resolution progress, updates the treasury and approval, posts an
+announcement, an agenda item and city feed entries — and can **physically change the map**
+(a tram line appears, a park blooms).
+
+---
+
+## ⭐ Replacing the city artwork
+
+The city art is a **single image**; every overlay sits on top in a fixed coordinate space.
 
 ```
 public/city-map.png      ← your image lives here
 ```
 
-**How it works**
+- `src/components/CityMap.tsx` uses a **1600 × 1000 (16:10)** coordinate space. Your
+  image covers it (`preserveAspectRatio="xMidYMid slice"`), so a slightly different
+  aspect ratio is centre-cropped — nothing breaks.
+- Interactive layers in that same space: problem markers, the congestion heat zone, the
+  tram line + stops, the unlocked community park, the "new neighbourhood" growth zone.
+- Marker positions are data — edit `x` / `y` on each problem in
+  `src/state/mockData.ts` (`INITIAL_PROBLEMS`):
 
-- The SVG in `src/components/CityMap.tsx` uses a `1600 × 1000` coordinate space
-  (16:10).
-- Your image is drawn to cover that space (`preserveAspectRatio="xMidYMid slice"`), so
-  a slightly different aspect ratio gets centre-cropped — nothing breaks.
-- Every interactive layer is positioned in that same `1600 × 1000` space, so markers
-  stay put no matter what you draw.
+| Marker | x | y |
+| --- | --- | --- |
+| Traffic crisis | 690 | 372 |
+| Water pressure | 1430 | 468 |
+| Housing shortage | 360 | 690 |
+| Air pollution | 1360 | 648 |
+| Energy demand | 1450 | 870 |
+| Healthcare pressure | 820 | 700 |
 
-**Positioning your markers**
-
-The problem markers are plain data. Move them by editing `x` / `y` in
-`src/state/mockData.ts` (`INITIAL_PROBLEMS`), in `1600 × 1000` units:
-
-| Marker | x | y | Suggested zone |
-| --- | --- | --- | --- |
-| Traffic crisis | 690 | 372 | downtown |
-| Water pressure | 1430 | 468 | reservoir / park |
-| Housing shortage | 360 | 690 | residential |
-| Air pollution | 1360 | 648 | industrial |
-
-The other overlays live in `src/components/CityMap.tsx` and use the same units: the
-congestion heat zone, the tram line path + stops, the unlocked community park, and the
-"new neighbourhood" growth zone.
-
-**Tips**
-
-- Ship a `1600 × 1000` (or any 16:10) render and no cropping happens at all.
-- Prefer `meet` over `slice` if you'd rather letterbox than crop — change
-  `preserveAspectRatio` on the `<image>` in `CityMap.tsx`.
-- `public/city-mapor.png` is the original placeholder (with zone guides + marker
-  anchors) — handy as a layout reference.
+- `public/city-mapor.png` is the original placeholder (with zone guides + marker anchors),
+  useful as a layout reference.
+- Prefer letterboxing to cropping? Change `preserveAspectRatio` on the `<image>` to `meet`.
 
 ---
 
@@ -68,53 +102,58 @@ npm run build    # type-check + production build
 npm run preview  # serve the production build
 ```
 
-Stack: **React + TypeScript + Vite**, hand-written modern CSS (design tokens in
-`src/styles/tokens.css`). No UI framework, no state library, no extra dependencies.
+Stack: **React + TypeScript + Vite**, hand-written CSS (tokens in `src/styles/tokens.css`).
+No UI framework, no state library, no extra dependencies.
 
 ---
 
 ## Look & feel
 
 **Modern pixel pastel.**
-- Display type: **Pixelify Sans** (pixel headings, logo).
-- Body type: **IBM Plex Sans**; all numerals + labels: **IBM Plex Mono** (tabular,
-  unambiguous digits — pixel display fonts render `5` and `8` too similarly for data).
-- Chunky 2px ink outlines and hard offset shadows (`4px 4px 0`) instead of blur/glass.
-- A pastel palette: mint, teal, periwinkle, peach, butter, blush on warm cream, with an
-  indigo-charcoal ink (`#2b2740`) for all outlines.
 
-All of that is driven by tokens, so retheming is a matter of editing
-`src/styles/tokens.css`.
+- Display: **Pixelify Sans** · body: **IBM Plex Sans** · all numerals & labels:
+  **IBM Plex Mono** (tabular, unambiguous digits — pixel display fonts render `5` and `8`
+  too similarly for data).
+- Chunky 2px ink outlines and hard offset shadows (`4px 4px 0`) instead of blur/glass.
+- Pastel palette (mint, teal, periwinkle, peach, butter, blush) on warm cream, with an
+  indigo-charcoal ink (`#2b2740`) for every outline.
+
+Retheming = editing `src/styles/tokens.css`.
 
 ## Mobile
 
 On phones (≤720px) the layout becomes a column: compact HUD → framed city board →
-a "needs your attention" list (the primary way to open issues, since map markers would
-be too small to tap) → city feed → bottom tab bar. Sheets go full-screen with a sticky
-header and footer.
+**Needs your attention** list (the primary way in, since map markers would be too small
+to tap — it includes the *Deputy access* row) → recent measures → city feed → bottom tab
+bar. Sheets go full-screen with sticky header/footer.
 
 ---
 
-## The 60–90 second demo flow
+## Demo flow (60–90 seconds)
 
-1. **Start on the city.** 2,481 citizens.
-2. Open the **TRAFFIC CRISIS** issue (marker on the map, or the "Start the demo" hint).
-3. **Open initiative** → *BUILD A NEW TRAM LINE?* with three policy options and live votes.
-4. Select **Build tram line** → **Cast your vote**.
-5. Reveal: **approved**, with indicators before → after (**Mobility 61 → 79**,
-   **Environment 72 → 81**).
-6. **Return to the city** — the tram line animates onto the map, the congestion zone
-   clears, the traffic problem shows as resolved.
-7. Open **Challenges** → Mobility Challenge at **472 / 500**.
-8. Click **I completed my journey** → **500 / 500** → 🎉 *City goal achieved — new
-   community park unlocked*, which blooms onto the map.
+1. **Start on the city.** 2,481 citizens; the TRAFFIC CRISIS marker pulses.
+2. Open the issue → details, 12% resolved, and the two measures already taken on it.
+3. Hit **Raise a measure** → **Party HQ**.
+4. The traffic problem is already selected. Type (or tap an idea):
+   *“Build a tram line linking the garden district to downtown, with trees along the
+   corridor.”*
+5. **Analyze with analyst** → watch the four stages → structured output with cost 820,
+   mobility +15, environment +19, happiness +11 and a confidence score.
+6. **Adopt measure** → internal vote 6–1, treasury −820, approval 58 → 67%, traffic
+   progress 12 → 82%, indicators move, a **tram line appears on the map**, and a new
+   announcement lands on the party page.
+7. Optional: **Challenges** → the Mobility Challenge at 472/500 → complete it → the
+   community park blooms on the map.
 
-Presenter deep links (also handy for sharing a screen):
+### Presenter deep links
 
-- `/?view=parties` · `?view=election` · `?view=challenges` · `?view=community` · `?view=profile`
-- `/?view=parties&party=green`
-- `/?view=initiatives&initiative=tram`
-- `/?view=initiatives&initiative=tram&cast=tram:tram` — jumps straight to the approved reveal
+- `/?view=issues` · `/?view=measures` · `/?view=parties` · `/?view=election` ·
+  `/?view=challenges` · `/?view=community` · `/?view=profile`
+- `/?view=issues&problem=traffic`
+- `/?view=parties&party=growth`
+- `/?hq=1&problem=traffic` — straight to the deputy desk
+- `/?hq=1&problem=traffic&draft=<text>&analyze=1` — jump to the analyst output
+- `/?hq=1&problem=traffic&draft=<text>&analyze=1&adopt=1` — apply it instantly
 
 ---
 
@@ -122,25 +161,15 @@ Presenter deep links (also handy for sharing a screen):
 
 | Screen | What it does |
 | --- | --- |
-| **City** | The hero map, HUD indicators, floating problem markers, budget & neighbourhood count |
-| **Issues** | Live urban pressures → open the related initiative |
-| **Initiatives** | Policy options with cost/impact forecasts, live vote bars, casting a vote and the approved reveal |
-| **Parties** | Fictional parties with manifestos, priorities, members and popularity |
-| **Election** | Results with a hemicycle council chart (12 seats) and turnout |
+| **City** | The hero map, HUD indicators, problem markers, budget & measure counters |
+| **Issues** | Master–detail: problem details, progress, timeline, measures already taken |
+| **Measures** | The full record of party decisions, with filters by status and party |
+| **Parties** | Leader, head of government, députés bench, announcements, manifesto, their measures |
+| **Party HQ** | Deputy desk: internal chat, agenda, bench, problem list, measure drafting + analyst |
+| **Election** | Results with a hemicycle council chart (12 seats) and head-of-government marker |
 | **Challenges** | Sustainability challenges, collective progress, unlocked city improvements |
-| **Community** | Live city feed + chat tabs (Global / Party / District / Initiative) |
+| **Community** | Live city feed + chat tabs (Global / Party / District / Measures) |
 | **Profile** | Citizen record — civic score, sustainability, party, badges |
-
----
-
-## The core idea
-
-```
-real-world sustainable behaviour → Urbloom challenge → civic reward → city improvement
-```
-
-Individual green actions feed a collective city goal; hitting the goal unlocks a real
-change on the map.
 
 ---
 
@@ -151,19 +180,21 @@ public/
   city-map.png            ← YOUR city artwork (swap freely)
   city-mapor.png          ← original placeholder, with zone guides
 src/
-  App.tsx                 app shell, deep links, guided demo hint, mobile layout
+  App.tsx                 shell, deep links, hidden door, keyboard shortcut, mobile layout
   styles/                 tokens + base CSS (pixel-pastel design system)
   state/
     types.ts              backend-ready state shapes
-    mockData.ts           all fictional demo data (+ marker coordinates)
-    GameContext.tsx       the reducer that simulates the city
+    mockData.ts           fictional data (problems, parties, députés, measures, HQ)
+    measureAI.ts          the simulated policy analyst
+    GameContext.tsx       reducer: adoption, internal votes, treasury, feed
   components/
     CityMap.tsx           artwork layer + interactive overlays (1600×1000 space)
     TopBar.tsx            population + indicator HUD
-    NavDock.tsx           floating game navigation
-    Sheet.tsx             overlay panel every screen renders inside
+    NavDock.tsx           floating navigation
+    Sheet.tsx             the overlay panel every screen renders inside
+    MeasureCard.tsx       the shared measure card
     MobilePanel.tsx       phone-only attention list + feed
     Toasts.tsx            civic event toasts
-  views/                  Issues, Initiatives, Parties, Election, Challenges, Community, Profile
+  views/                  Issues, Measures, Parties, PartyHQ, Election, Challenges, Community, Profile
   hooks/useCountUp.ts     animated counters
 ```

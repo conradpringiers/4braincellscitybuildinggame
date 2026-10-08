@@ -6,8 +6,9 @@ import type {
   ChatTab,
   CitizenProfile,
   FeedEvent,
-  Initiative,
+  Measure,
   Party,
+  PartyHq,
 } from './types'
 
 /* ============================================================
@@ -39,6 +40,16 @@ export const INITIAL_INDICATORS: CityIndicators = {
 export const INITIAL_POPULATION = 2481
 export const INITIAL_BUDGET = 4200
 
+export const PROBLEM_ICON: Record<CityProblem['kind'], string> = {
+  traffic: '🚗',
+  water: '💧',
+  housing: '🏠',
+  energy: '⚡',
+  waste: '🗑️',
+  pollution: '🌫️',
+  health: '🏥',
+}
+
 /* ------------------------------------------------------------
    City problems — pinned to coordinates on the city map
    ------------------------------------------------------------ */
@@ -49,12 +60,17 @@ export const INITIAL_PROBLEMS: CityProblem[] = [
     title: 'TRAFFIC CRISIS',
     metric: '+18% congestion',
     detail:
-      'Downtown arterials are running 18% above capacity during peak hours. Average commute times have risen to 41 minutes.',
+      'Downtown arterials are running 18% above capacity during peak hours. Average commute times have risen to 41 minutes, and the river bridges are the worst bottlenecks in the city.',
     x: 690,
     y: 372,
     severity: 'critical',
-    initiativeId: 'tram',
-    resolved: false,
+    status: 'open',
+    progress: 12,
+    timeline: [
+      { time: '6h ago', text: 'Congestion passed the critical threshold downtown.' },
+      { time: '3d ago', text: 'Growth First widened the northern interchange.', partyId: 'growth' },
+      { time: '2w ago', text: 'Green Future opened the riverside cycle network.', partyId: 'green' },
+    ],
   },
   {
     id: 'water',
@@ -62,12 +78,16 @@ export const INITIAL_PROBLEMS: CityProblem[] = [
     title: 'WATER PRESSURE',
     metric: 'Reservoir at 54%',
     detail:
-      'The east reservoir is dropping faster than seasonal average. Brackish intrusion detected near the river delta.',
+      'The east reservoir is dropping faster than the seasonal average. Brackish intrusion has been detected near the river delta and two districts face summer restrictions.',
     x: 1430,
     y: 468,
     severity: 'warning',
-    initiativeId: 'reservoir',
-    resolved: false,
+    status: 'in-progress',
+    progress: 46,
+    timeline: [
+      { time: '1d ago', text: 'Community First demanded a household support scheme.' },
+      { time: '4d ago', text: 'Green Future adopted a greywater retrofit programme.', partyId: 'green' },
+    ],
   },
   {
     id: 'housing',
@@ -75,12 +95,16 @@ export const INITIAL_PROBLEMS: CityProblem[] = [
     title: 'HOUSING SHORTAGE',
     metric: '1,900 on waiting list',
     detail:
-      'Rental vacancy has fallen below 1%. New districts cannot absorb the incoming population wave.',
+      'Rental vacancy has fallen below 1%. New districts cannot absorb the incoming population wave and eviction notices are rising in the old town.',
     x: 360,
     y: 690,
     severity: 'warning',
-    initiativeId: 'housing',
-    resolved: false,
+    status: 'in-progress',
+    progress: 34,
+    timeline: [
+      { time: '2d ago', text: 'Community First proposed a compact eco-district.' },
+      { time: '1w ago', text: 'Emergency rental support scheme applied.', partyId: 'community' },
+    ],
   },
   {
     id: 'pollution',
@@ -88,166 +112,133 @@ export const INITIAL_PROBLEMS: CityProblem[] = [
     title: 'AIR POLLUTION',
     metric: 'PM2.5 elevated',
     detail:
-      'Industrial emissions are drifting over the north residential belt. Air quality index sits at 143.',
+      'Industrial emissions drift over the north residential belt. The air quality index sits at 143 and asthma admissions are climbing in schools near the works district.',
     x: 1360,
     y: 648,
     severity: 'watch',
-    initiativeId: 'tram',
-    resolved: false,
+    status: 'in-progress',
+    progress: 40,
+    timeline: [
+      { time: '5h ago', text: 'A citizens’ petition reached 2,000 signatures.' },
+      { time: '2d ago', text: 'Growth First adopted an air-filters mandate.', partyId: 'growth' },
+    ],
+  },
+  {
+    id: 'energy',
+    kind: 'energy',
+    title: 'ENERGY DEMAND',
+    metric: 'Grid at 91% peak',
+    detail:
+      'Evening peak demand is brushing the grid’s safe limit. The works district and the new towers both draw heavily between 18:00 and 21:00.',
+    x: 1450,
+    y: 870,
+    severity: 'warning',
+    status: 'open',
+    progress: 20,
+    timeline: [
+      { time: '9h ago', text: 'Two brownouts recorded in the works district.' },
+      { time: '5d ago', text: 'Green Future opened talks on rooftop solar.', partyId: 'green' },
+    ],
+  },
+  {
+    id: 'health',
+    kind: 'health',
+    title: 'HEALTHCARE PRESSURE',
+    metric: 'ER wait +34 min',
+    detail:
+      'Central Hospital reports rising emergency admissions. Staff shortages in the eastern clinics are pushing wait times above the regional threshold.',
+    x: 820,
+    y: 700,
+    severity: 'watch',
+    status: 'open',
+    progress: 15,
+    timeline: [{ time: '1d ago', text: 'Nursing union filed a formal complaint.' }],
   },
 ]
 
 /* ------------------------------------------------------------
-   Initiatives
+   Measures — decisions already taken by the parties
    ------------------------------------------------------------ */
-export const INITIAL_INITIATIVES: Initiative[] = [
+export const INITIAL_MEASURES: Measure[] = [
   {
-    id: 'tram',
-    question: 'BUILD A NEW TRAM LINE?',
-    context: 'Downtown congestion has increased by 18% this quarter.',
+    id: 'm-cycyle',
     problemId: 'traffic',
-    status: 'open',
-    closesIn: '2d 06h',
-    voters: 1432,
-    options: [
-      {
-        id: 'tram',
-        title: 'Build tram line',
-        blurb:
-          'A 6.2 km light-rail loop connecting the suburbs, downtown and the riverfront.',
-        cost: 800,
-        votes: 54,
-        impacts: [
-          { label: 'Traffic', value: '-25', tone: 'good' },
-          { label: 'Environment', value: '+15', tone: 'good' },
-          { label: 'Budget', value: '-800', tone: 'bad' },
-        ],
-        effect: { mobility: 18, environment: 9 },
-      },
-      {
-        id: 'highway',
-        title: 'Expand highway',
-        blurb:
-          'Widen the northern arterial to three lanes each way with a new interchange.',
-        cost: 500,
-        votes: 31,
-        impacts: [
-          { label: 'Traffic', value: '-20', tone: 'good' },
-          { label: 'Environment', value: '-10', tone: 'bad' },
-          { label: 'Budget', value: '-500', tone: 'bad' },
-        ],
-        effect: { mobility: 13, environment: -8 },
-      },
-      {
-        id: 'nothing',
-        title: 'Do nothing',
-        blurb:
-          'Defer the decision to the next council term and monitor conditions.',
-        cost: 0,
-        votes: 15,
-        impacts: [
-          { label: 'Traffic', value: '+10', tone: 'bad' },
-          { label: 'Budget', value: '0', tone: 'neutral' },
-        ],
-        effect: { mobility: -7 },
-      },
-    ],
+    partyId: 'green',
+    title: 'Riverside cycling network',
+    body:
+      'Open a continuous protected cycling corridor along the river, linking the garden district to downtown with 14 km of separated lanes and 900 secure parking spaces.',
+    tags: ['Mobility', 'Environment'],
+    cost: 320,
+    status: 'applied',
+    createdAt: '2 weeks ago',
+    votes: { for: 6, against: 1 },
+    effects: { mobility: 12, environment: 5 },
+    summary: 'Classified as Mobility / Environment. Projected impact: mobility +12, environment +5.',
+    flags: {},
   },
   {
-    id: 'housing',
-    question: 'WHERE SHOULD NEW CITIZENS LIVE?',
-    context: '1,900 citizens are on the district waiting list.',
-    problemId: 'housing',
-    status: 'open',
-    closesIn: '5d 12h',
-    voters: 984,
-    options: [
-      {
-        id: 'dense',
-        title: 'Compact eco-district',
-        blurb: 'Mid-rise timber blocks with shared courtyards and a car-free core.',
-        cost: 640,
-        votes: 61,
-        impacts: [
-          { label: 'Housing', value: '+900', tone: 'good' },
-          { label: 'Environment', value: '+8', tone: 'good' },
-          { label: 'Budget', value: '-640', tone: 'bad' },
-        ],
-        effect: { happiness: 4, environment: 6 },
-      },
-      {
-        id: 'sprawl',
-        title: 'Suburban expansion',
-        blurb: 'Low-density housing across the greenbelt with new roads.',
-        cost: 380,
-        votes: 27,
-        impacts: [
-          { label: 'Housing', value: '+640', tone: 'good' },
-          { label: 'Traffic', value: '+12', tone: 'bad' },
-          { label: 'Budget', value: '-380', tone: 'bad' },
-        ],
-        effect: { happiness: 3, environment: -6, mobility: -4 },
-      },
-      {
-        id: 'wait',
-        title: 'Wait and review',
-        blurb: 'Pause new permits while a housing strategy is drafted.',
-        cost: 0,
-        votes: 12,
-        impacts: [
-          { label: 'Housing', value: '-200', tone: 'bad' },
-          { label: 'Happiness', value: '-6', tone: 'bad' },
-        ],
-        effect: { happiness: -6 },
-      },
-    ],
-  },
-  {
-    id: 'reservoir',
-    question: 'HOW DO WE SECURE THE WATER SUPPLY?',
-    context: 'The east reservoir has dropped to 54% capacity.',
+    id: 'm-greywater',
     problemId: 'water',
-    status: 'open',
-    closesIn: '1d 03h',
-    voters: 612,
-    options: [
-      {
-        id: 'recycle',
-        title: 'Greywater recycling',
-        blurb: 'Retrofit the eastern district with closed-loop water reuse.',
-        cost: 520,
-        votes: 58,
-        impacts: [
-          { label: 'Water', value: '+14', tone: 'good' },
-          { label: 'Budget', value: '-520', tone: 'bad' },
-        ],
-        effect: { water: 14 },
-      },
-      {
-        id: 'desal',
-        title: 'Desalination plant',
-        blurb: 'High-output plant on the river delta with heavy energy draw.',
-        cost: 900,
-        votes: 30,
-        impacts: [
-          { label: 'Water', value: '+24', tone: 'good' },
-          { label: 'Energy', value: '-12', tone: 'bad' },
-        ],
-        effect: { water: 22, energy: -12 },
-      },
-      {
-        id: 'ration',
-        title: 'Voluntary rationing',
-        blurb: 'Public campaign asking citizens to reduce use by 15%.',
-        cost: 40,
-        votes: 12,
-        impacts: [
-          { label: 'Water', value: '+6', tone: 'good' },
-          { label: 'Happiness', value: '-4', tone: 'bad' },
-        ],
-        effect: { water: 5, happiness: -4 },
-      },
-    ],
+    partyId: 'green',
+    title: 'East reservoir greywater retrofit',
+    body:
+      'Retrofit the eastern district with closed-loop greywater recycling and rain gardens, cutting potable water demand by 18%.',
+    tags: ['Water'],
+    cost: 520,
+    status: 'adopted',
+    createdAt: '4 days ago',
+    votes: { for: 5, against: 2 },
+    effects: { water: 12, environment: 4 },
+    summary: 'Classified as Water. Projected impact: water +12.',
+    flags: {},
+  },
+  {
+    id: 'm-interchange',
+    problemId: 'traffic',
+    partyId: 'growth',
+    title: 'Northern interchange widening',
+    body:
+      'Widen the northern arterial to three lanes each way and rebuild the interchange to move freight faster through the works district.',
+    tags: ['Mobility'],
+    cost: 500,
+    status: 'applied',
+    createdAt: '3 days ago',
+    votes: { for: 4, against: 0 },
+    effects: { mobility: 8, environment: -6 },
+    summary: 'Classified as Mobility. Projected impact: mobility +8, environment −6.',
+    flags: {},
+  },
+  {
+    id: 'm-rent',
+    problemId: 'housing',
+    partyId: 'community',
+    title: 'Emergency rental support scheme',
+    body:
+      'A six-month rent guarantee for households on the waiting list, paired with a cap on short-term holiday lets in the old town.',
+    tags: ['Housing', 'Services'],
+    cost: 180,
+    status: 'applied',
+    createdAt: '1 week ago',
+    votes: { for: 1, against: 0 },
+    effects: { happiness: 8 },
+    summary: 'Classified as Housing / Services. Projected impact: happiness +8.',
+    flags: {},
+  },
+  {
+    id: 'm-filters',
+    problemId: 'pollution',
+    partyId: 'growth',
+    title: 'Industrial air-filters mandate',
+    body:
+      'Require every works-district operator to install particulate filters within 12 months and publish live emissions data.',
+    tags: ['Environment'],
+    cost: 260,
+    status: 'adopted',
+    createdAt: '2 days ago',
+    votes: { for: 3, against: 1 },
+    effects: { environment: 9, happiness: -3 },
+    summary: 'Classified as Environment. Projected impact: environment +9, happiness −3.',
+    flags: {},
   },
 ]
 
@@ -276,6 +267,22 @@ export const PARTIES: Party[] = [
     popularity: 54,
     seats: 7,
     leader: 'Maya Okonkwo',
+    headOfGovernment: true,
+    mps: [
+      { id: 'mp-maya', name: 'Maya Okonkwo', initials: 'MO', role: 'Leader · Head of Government', online: true },
+      { id: 'mp-lena', name: 'Lena Farkas', initials: 'LF', role: 'Water & Health', online: true },
+      { id: 'mp-tomas', name: 'Tomás Beltrán', initials: 'TB', role: 'Transport', online: false },
+      { id: 'mp-aiko', name: 'Aiko Nakamura', initials: 'AN', role: 'Environment', online: true },
+      { id: 'mp-ravi', name: 'Ravi Menon', initials: 'RM', role: 'Energy', online: false },
+      { id: 'mp-sofia', name: 'Sofia Bergström', initials: 'SB', role: 'Housing', online: true },
+      { id: 'mp-noah', name: 'Noah Adeyemi', initials: 'NA', role: 'Chief Whip', online: false },
+    ],
+    announcements: [
+      { id: 'ga1', time: '2h', text: 'The riverside cycle network is now open to the public.' },
+      { id: 'ga2', time: '1d', text: 'We are drafting a greywater retrofit for the east reservoir.' },
+      { id: 'ga3', time: '3d', text: 'Greenbelt protection clause attached to every new permit.' },
+      { id: 'ga4', time: '6d', text: 'Rooftop solar talks opened with the works district.' },
+    ],
   },
   {
     id: 'growth',
@@ -298,6 +305,18 @@ export const PARTIES: Party[] = [
     popularity: 31,
     seats: 4,
     leader: 'Alex Renard',
+    headOfGovernment: false,
+    mps: [
+      { id: 'mp-alex', name: 'Alex Renard', initials: 'AR', role: 'Leader · Opposition', online: true },
+      { id: 'mp-jonas', name: 'Jonas Keller', initials: 'JK', role: 'Infrastructure', online: true },
+      { id: 'mp-marta', name: 'Marta Ruiz', initials: 'MR', role: 'Economy', online: false },
+      { id: 'mp-dmitri', name: 'Dmitri Volkov', initials: 'DV', role: 'Industry', online: false },
+    ],
+    announcements: [
+      { id: 'xa1', time: '4h', text: 'The northern interchange reopens with three lanes each way.' },
+      { id: 'xa2', time: '2d', text: 'Air-filters mandate adopted for the works district.' },
+      { id: 'xa3', time: '5d', text: 'We will oppose any new tax on freight.' },
+    ],
   },
   {
     id: 'community',
@@ -320,8 +339,57 @@ export const PARTIES: Party[] = [
     popularity: 15,
     seats: 1,
     leader: 'Priya Raman',
+    headOfGovernment: false,
+    mps: [{ id: 'mp-priya', name: 'Priya Raman', initials: 'PR', role: 'Leader · Housing & Care', online: true }],
+    announcements: [
+      { id: 'ca1', time: '1d', text: 'Emergency rental support is now live for 400 households.' },
+      { id: 'ca2', time: '4d', text: 'We tabled a motion on eastern clinic staffing.' },
+    ],
   },
 ]
+
+/* ------------------------------------------------------------
+   Party HQ — the desk of a Green Future deputy
+   ------------------------------------------------------------ */
+export const INITIAL_HQ: PartyHq = {
+  partyId: 'green',
+  treasury: 3400,
+  approval: 58,
+  coalition: ['community'],
+  electionIn: '3d 04h',
+  chat: [
+    {
+      id: 'hq1',
+      author: 'Maya',
+      initials: 'MO',
+      color: '#56A867',
+      text: 'Whip check in ten. How is the downtown congestion measure coming along?',
+      time: '09:02',
+    },
+    {
+      id: 'hq2',
+      author: 'Tomás',
+      initials: 'TB',
+      color: '#6C90E0',
+      text: 'Draft is ready. A tram loop beats another lane — the model agrees.',
+      time: '09:05',
+    },
+    {
+      id: 'hq3',
+      author: 'Aiko',
+      initials: 'AN',
+      color: '#3AA091',
+      text: 'Attach a planting clause to the corridor and I can move it through committee.',
+      time: '09:07',
+    },
+  ],
+  agenda: [
+    { id: 'ag1', time: '09:30', text: 'Committee vote on the water retrofit', tone: 'blue' },
+    { id: 'ag2', time: '11:00', text: 'Coalition meeting with Community First', tone: 'teal' },
+    { id: 'ag3', time: '14:15', text: 'Press briefing on downtown congestion', tone: 'orange' },
+    { id: 'ag4', time: '16:00', text: 'Whip count for the tram measure', tone: 'sage' },
+  ],
+}
 
 /* ------------------------------------------------------------
    Sustainability challenges
@@ -331,8 +399,7 @@ export const INITIAL_CHALLENGES: Challenge[] = [
     id: 'mobility',
     title: 'Mobility Challenge',
     icon: '🚲',
-    brief:
-      'Choose walking, cycling or public transport for one journey today.',
+    brief: 'Choose walking, cycling or public transport for one journey today.',
     reward: '+50 Civic Energy',
     progress: 472,
     goal: 500,
@@ -379,38 +446,38 @@ export const INITIAL_FEED: FeedEvent[] = [
   },
   {
     id: 'f2',
+    icon: '⚖️',
+    text: 'Green Future adopted the greywater retrofit programme.',
+    time: '14m',
+    tone: 'sage',
+  },
+  {
+    id: 'f3',
     icon: '🏘️',
     text: '300 new citizens joined Civitas this week.',
     time: '18m',
     tone: 'blue',
   },
   {
-    id: 'f3',
-    icon: '🌱',
-    text: '486 citizens have accepted the Mobility Challenge.',
+    id: 'f4',
+    icon: '🌫️',
+    text: 'Growth First adopted an industrial air-filters mandate.',
     time: '41m',
-    tone: 'sage',
+    tone: 'orange',
   },
   {
-    id: 'f4',
+    id: 'f5',
     icon: '🏥',
     text: 'Central Hospital reports rising emergency admissions.',
     time: '1h',
     tone: 'pink',
   },
   {
-    id: 'f5',
+    id: 'f6',
     icon: '💧',
     text: 'East reservoir dropped below 55% capacity.',
     time: '2h',
     tone: 'teal',
-  },
-  {
-    id: 'f6',
-    icon: '🌳',
-    text: 'Riverfront walkway reopens after replanting.',
-    time: '3h',
-    tone: 'sage',
   },
 ]
 
@@ -497,7 +564,7 @@ export const INITIAL_CHAT: Record<ChatTab, ChatMessage[]> = {
       time: '07:52',
     },
   ],
-  INITIATIVE: [
+  MEASURES: [
     {
       id: 'i1',
       author: 'Priya',
@@ -527,9 +594,9 @@ export const INITIAL_PROFILE: CitizenProfile = {
   sustainability: 68,
   partyId: 'green',
   challenges: 24,
-  rank: 'Neighbourhood Steward',
+  rank: 'Deputy · Green Future',
   badges: [
-    { id: 'first-vote', label: 'First Vote', icon: '🗳️', earned: true },
+    { id: 'first-vote', label: 'First Measure', icon: '📜', earned: true },
     { id: 'city-builder', label: 'City Builder', icon: '🏗️', earned: true },
     { id: 'green-commuter', label: 'Green Commuter', icon: '🚲', earned: true },
     { id: 'community-hero', label: 'Community Hero', icon: '🏅', earned: false },

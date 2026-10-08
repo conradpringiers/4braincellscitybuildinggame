@@ -15,6 +15,10 @@ body,
   height: 100%;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -285,4 +289,26 @@ ul {
   0% { opacity: 0; transform: scale(0.92); }
   60% { opacity: 1; transform: scale(1.02); }
   100% { transform: scale(1); }
+}
+
+/* ---------- staggered entrances ---------- */
+.rise {
+  animation: riseIn 0.42s var(--ease) backwards;
+}
+.stagger > * {
+  animation-delay: calc(var(--i, 0) * 32ms + 60ms);
+}
+
+/* ============================================================
+   Motion preferences — keep everything calm if asked
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

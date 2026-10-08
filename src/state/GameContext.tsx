@@ -12,8 +12,9 @@ import {
   INITIAL_CHALLENGES,
   INITIAL_CHAT,
   INITIAL_FEED,
+  INITIAL_HQ,
   INITIAL_INDICATORS,
-  INITIAL_INITIATIVES,
+  INITIAL_MEASURES,
   INITIAL_POPULATION,
   INITIAL_PROBLEMS,
   INITIAL_PROFILE,
@@ -28,7 +29,10 @@ import type {
   Challenge,
   CitizenProfile,
   FeedEvent,
-  Initiative,
+  HqAgendaItem,
+  Measure,
+  Party,
+  PartyHq,
   Toast,
   ViewKey,
 } from './types'
@@ -45,34 +49,45 @@ export interface CityStats {
   parkUnlocked: boolean
 }
 
-export interface DecisionRecord {
-  initiativeId: string
-  optionId: string
+export interface AdoptionRecord {
+  measureId: string
+  problemId: string
   before: CityIndicators
   after: CityIndicators
   deltas: { key: IndicatorKey; icon: string; label: string; delta: number }[]
+  resolved: boolean
+}
+
+export interface MeasureInput {
+  problemId: string
+  title: string
+  body: string
+  tags: string[]
+  cost: number
+  effects: Partial<Record<IndicatorKey, number>>
+  summary: string
+  flags: { tram?: boolean; park?: boolean; housing?: boolean }
+  votes: { for: number; against: number }
 }
 
 interface GameState {
   stats: CityStats
   indicators: CityIndicators
   problems: CityProblem[]
-  initiatives: Initiative[]
+  measures: Measure[]
+  parties: Party[]
   challenges: Challenge[]
   feed: FeedEvent[]
   chat: Record<ChatTab, ChatMessage[]>
   profile: CitizenProfile
-  userVotes: Record<string, string>
-  lastDecision: DecisionRecord | null
+  hq: PartyHq
+  lastAdoption: AdoptionRecord | null
 
   view: ViewKey
   activeProblemId: string | null
-  activeInitiativeId: string | null
   activePartyId: string | null
   activeChatTab: ChatTab
   toasts: Toast[]
-
-  /** purely visual: bumps to retrigger an "arrival" animation on the map */
   arrivalPulse: number
 }
 
@@ -80,31 +95,31 @@ type Action =
   | { type: 'OPEN_VIEW'; view: ViewKey }
   | { type: 'CLOSE_SHEET' }
   | { type: 'OPEN_PROBLEM'; problemId: string }
-  | { type: 'OPEN_INITIATIVE'; initiativeId: string }
   | { type: 'OPEN_PARTY'; partyId: string }
   | { type: 'JOIN_PARTY'; partyId: string }
-  | { type: 'CAST_VOTE'; initiativeId: string; optionId: string }
+  | { type: 'OPEN_HQ'; problemId?: string }
+  | { type: 'ADOPT_MEASURE'; input: MeasureInput }
+  | { type: 'SET_CHAT_TAB'; tab: ChatTab }
+  | { type: 'SEND_CHAT'; text: string }
+  | { type: 'SEND_HQ_CHAT'; text: string }
   | { type: 'COMPLETE_CHALLENGE'; challengeId: string }
   | { type: 'JOIN_CHALLENGE'; challengeId: string }
   | { type: 'ADD_CITIZENS'; count: number }
-  | { type: 'SET_CHAT_TAB'; tab: ChatTab }
-  | { type: 'SEND_CHAT'; text: string }
   | { type: 'DISMISS_TOAST'; id: string }
 
 const clamp = (n: number) => Math.max(0, Math.min(100, Math.round(n)))
 
-let toastSeed = 0
-const nextToastId = () => `toast-${Date.now()}-${toastSeed++}`
+let seed = 0
+const uid = (p: string) => `${p}-${Date.now().toString(36)}-${seed++}`
+const nowTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 
-let feedSeed = 0
-const nextFeedId = () => `feed-x-${Date.now()}-${feedSeed++}`
-
-const makeToast = (
-  icon: string,
-  title: string,
-  tone: Toast['tone'],
-  body?: string,
-): Toast => ({ id: nextToastId(), icon, title, tone, body })
+const makeToast = (icon: string, title: string, tone: Toast['tone'], body?: string): Toast => ({
+  id: uid('toast'),
+  icon,
+  title,
+  tone,
+  body,
+})
 
 const initialState: GameState = {
   stats: {
@@ -115,10 +130,12 @@ const initialState: GameState = {
     parkUnlocked: false,
   },
   indicators: { ...INITIAL_INDICATORS },
-  problems: INITIAL_PROBLEMS.map((p) => ({ ...p })),
-  initiatives: INITIAL_INITIATIVES.map((i) => ({
-    ...i,
-    options: i.options.map((o) => ({ ...o, impacts: o.impacts.map((x) => ({ ...x })) })),
+  problems: INITIAL_PROBLEMS.map((p) => ({ ...p, timeline: [...p.timeline] })),
+  measures: INITIAL_MEASURES.map((m) => ({ ...m })),
+  parties: PARTIES.map((p) => ({
+    ...p,
+    mps: p.mps.map((m) => ({ ...m })),
+    announcements: p.announcements.map((a) => ({ ...a })),
   })),
   challenges: INITIAL_CHALLENGES.map((c) => ({ ...c })),
   feed: INITIAL_FEED.map((f) => ({ ...f })),
@@ -126,15 +143,19 @@ const initialState: GameState = {
     GLOBAL: INITIAL_CHAT.GLOBAL.map((m) => ({ ...m })),
     PARTY: INITIAL_CHAT.PARTY.map((m) => ({ ...m })),
     DISTRICT: INITIAL_CHAT.DISTRICT.map((m) => ({ ...m })),
-    INITIATIVE: INITIAL_CHAT.INITIATIVE.map((m) => ({ ...m })),
+    MEASURES: INITIAL_CHAT.MEASURES.map((m) => ({ ...m })),
   },
   profile: { ...INITIAL_PROFILE, badges: INITIAL_PROFILE.badges.map((b) => ({ ...b })) },
-  userVotes: {},
-  lastDecision: null,
+  hq: {
+    ...INITIAL_HQ,
+    coalition: [...INITIAL_HQ.coalition],
+    chat: INITIAL_HQ.chat.map((m) => ({ ...m })),
+    agenda: INITIAL_HQ.agenda.map((a) => ({ ...a })),
+  },
+  lastAdoption: null,
 
   view: 'city',
   activeProblemId: null,
-  activeInitiativeId: null,
   activePartyId: null,
   activeChatTab: 'GLOBAL',
   toasts: [],
@@ -157,26 +178,27 @@ function applyEffects(
   return next
 }
 
-/** Blend a single user vote into the displayed percentages so the bar moves. */
-function blendVotes(votes: number[], chosenIndex: number): number[] {
-  const boosted = votes.map((v, i) => (i === chosenIndex ? v + 7 : v))
-  const total = boosted.reduce((a, b) => a + b, 0)
-  const scaled = boosted.map((v) => Math.round((v / total) * 100))
-  const drift = 100 - scaled.reduce((a, b) => a + b, 0)
-  scaled[chosenIndex] += drift
-  return scaled
-}
-
 function diffIndicators(
   before: CityIndicators,
   after: CityIndicators,
-): DecisionRecord['deltas'] {
+): AdoptionRecord['deltas'] {
   return INDICATOR_META.map((m) => ({
     key: m.key,
     icon: m.icon,
     label: m.label,
     delta: after[m.key] - before[m.key],
   })).filter((d) => d.delta !== 0)
+}
+
+/** how much a measure moves a problem toward resolution */
+function progressGain(effects: Partial<Record<IndicatorKey, number>>): number {
+  const total = Object.values(effects).reduce((a, b) => a + Math.max(0, b ?? 0), 0)
+  return Math.min(70, 18 + total * 1.6)
+}
+
+function approvalGain(effects: Partial<Record<IndicatorKey, number>>): number {
+  const total = Object.values(effects).reduce((a, b) => a + (b ?? 0), 0)
+  return Math.round(Math.max(-6, Math.min(9, total / 4)))
 }
 
 /* ============================================================
@@ -193,55 +215,167 @@ function reducer(state: GameState, action: Action): GameState {
         ...state,
         view: 'city',
         activeProblemId: null,
-        activeInitiativeId: null,
         activePartyId: null,
-        lastDecision: null,
+        lastAdoption: null,
       }
 
-    case 'OPEN_PROBLEM': {
-      const problem = state.problems.find((p) => p.id === action.problemId)
-      return {
-        ...state,
-        activeProblemId: action.problemId,
-        activeInitiativeId: problem ? problem.initiativeId : null,
-        view: 'issues',
-      }
-    }
-
-    case 'OPEN_INITIATIVE':
-      return {
-        ...state,
-        activeInitiativeId: action.initiativeId,
-        view: 'initiatives',
-      }
+    case 'OPEN_PROBLEM':
+      return { ...state, activeProblemId: action.problemId, view: 'issues' }
 
     case 'OPEN_PARTY':
       return { ...state, activePartyId: action.partyId, view: 'parties' }
 
+    case 'OPEN_HQ':
+      return {
+        ...state,
+        view: 'partyhq',
+        activeProblemId: action.problemId ?? state.activeProblemId,
+      }
+
     case 'JOIN_PARTY': {
       if (state.profile.partyId === action.partyId) return state
-      const party = PARTIES.find((p) => p.id === action.partyId)
+      const party = state.parties.find((p) => p.id === action.partyId)
       return {
         ...state,
         profile: { ...state.profile, partyId: action.partyId },
+        hq: { ...state.hq, partyId: action.partyId },
         feed: [
-          {
-            id: nextFeedId(),
-            icon: '🤝',
-            text: `${state.profile.name} joined ${party?.name ?? 'a party'}.`,
-            time: 'now',
-            tone: 'teal',
-          },
+          { id: uid('feed'), icon: '🤝', text: `Conrad joined ${party?.name ?? 'a party'}.`, time: 'now', tone: 'teal' },
           ...state.feed,
         ],
         toasts: [
           ...state.toasts,
-          makeToast(
-            party?.mark ?? '🤝',
-            `Joined ${party?.name ?? 'party'}`,
-            'teal',
-            party?.tagline,
-          ),
+          makeToast(party?.mark ?? '🤝', `Joined ${party?.name ?? 'party'}`, 'teal', party?.tagline),
+        ],
+      }
+    }
+
+    case 'ADOPT_MEASURE': {
+      const { input } = action
+      const party = state.parties.find((p) => p.id === state.hq.partyId)
+      const problem = state.problems.find((p) => p.id === input.problemId) ?? null
+
+      const measure: Measure = {
+        id: uid('measure'),
+        problemId: input.problemId,
+        partyId: state.hq.partyId,
+        title: input.title,
+        body: input.body,
+        tags: input.tags,
+        cost: input.cost,
+        status: 'applied',
+        createdAt: 'just now',
+        votes: input.votes,
+        effects: input.effects,
+        summary: input.summary,
+        flags: input.flags,
+      }
+
+      const before = { ...state.indicators }
+      const after = applyEffects(state.indicators, input.effects)
+
+      const gain = progressGain(input.effects)
+
+      const nextProblems: CityProblem[] = state.problems.map((p) => {
+        if (p.id !== input.problemId) return p
+        const progress = clamp(p.progress + gain)
+        const status: CityProblem['status'] = progress >= 100 ? 'resolved' : 'in-progress'
+        return {
+          ...p,
+          progress,
+          status,
+          metric: status === 'resolved' ? 'Under control' : p.metric,
+          timeline: [
+            {
+              time: 'now',
+              text: `${party?.name ?? 'The party'} applied: ${input.title}.`,
+              partyId: state.hq.partyId,
+            },
+            ...p.timeline,
+          ],
+        }
+      })
+
+      const nextProblem = nextProblems.find((p) => p.id === input.problemId) ?? null
+      const justResolved = Boolean(problem && nextProblem && nextProblem.status === 'resolved' && problem.status !== 'resolved')
+
+      const agendaItem: HqAgendaItem = {
+        id: uid('ag'),
+        time: nowTime(),
+        text: `Measure adopted: ${input.title}`,
+        tone: 'sage',
+      }
+
+      const announcements = party
+        ? [
+            { id: uid('an'), time: 'now', text: `${input.title} adopted by internal vote (${input.votes.for}–${input.votes.against}).` },
+            ...party.announcements,
+          ]
+        : []
+
+      const nextParties = state.parties.map((p) =>
+        p.id !== state.hq.partyId ? p : { ...p, announcements },
+      )
+
+      const feedEvents: FeedEvent[] = [
+        {
+          id: uid('feed'),
+          icon: '⚖️',
+          text: `${party?.name ?? 'A party'} adopted: ${input.title}.`,
+          time: 'now',
+          tone: 'sage',
+        },
+      ]
+      if (justResolved && nextProblem) {
+        feedEvents.push({
+          id: uid('feed'),
+          icon: '✅',
+          text: `${nextProblem.title} is now under control.`,
+          time: 'now',
+          tone: 'teal',
+        })
+      }
+
+      const record: AdoptionRecord = {
+        measureId: measure.id,
+        problemId: input.problemId,
+        before,
+        after,
+        deltas: diffIndicators(before, after),
+        resolved: justResolved,
+      }
+
+      const approval = Math.max(0, Math.min(100, state.hq.approval + approvalGain(input.effects)))
+
+      return {
+        ...state,
+        measures: [measure, ...state.measures],
+        problems: nextProblems,
+        parties: nextParties,
+        indicators: after,
+        stats: {
+          ...state.stats,
+          tramBuilt: state.stats.tramBuilt || Boolean(input.flags.tram),
+          parkUnlocked: state.stats.parkUnlocked || Boolean(input.flags.park),
+        },
+        hq: {
+          ...state.hq,
+          treasury: Math.max(0, state.hq.treasury - input.cost),
+          approval,
+          agenda: [agendaItem, ...state.hq.agenda],
+        },
+        profile: {
+          ...state.profile,
+          civicScore: state.profile.civicScore + 25,
+        },
+        feed: [...feedEvents, ...state.feed],
+        lastAdoption: record,
+        toasts: [
+          ...state.toasts,
+          makeToast('⚖️', 'Measure applied', 'sage', input.title),
+          ...(justResolved && nextProblem
+            ? [makeToast('✅', `${nextProblem.title} resolved`, 'teal', 'The city is under control here.')]
+            : []),
         ],
       }
     }
@@ -253,12 +387,12 @@ function reducer(state: GameState, action: Action): GameState {
       const text = action.text.trim()
       if (!text) return state
       const msg: ChatMessage = {
-        id: `me-${Date.now()}`,
+        id: uid('me'),
         author: 'You',
         initials: 'C',
         color: '#2B2740',
         text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        time: nowTime(),
         mine: true,
       }
       return {
@@ -267,139 +401,37 @@ function reducer(state: GameState, action: Action): GameState {
       }
     }
 
-    case 'CAST_VOTE': {
-      const initiative = state.initiatives.find((i) => i.id === action.initiativeId)
-      if (!initiative || initiative.status === 'passed') return state
-
-      const chosenIndex = initiative.options.findIndex((o) => o.id === action.optionId)
-      if (chosenIndex < 0) return state
-      const chosen = initiative.options[chosenIndex]
-
-      const blended = blendVotes(
-        initiative.options.map((o) => o.votes),
-        chosenIndex,
-      )
-
-      const before = { ...state.indicators }
-      const after = applyEffects(state.indicators, chosen.effect)
-
-      const nextInitiatives = state.initiatives.map((i) =>
-        i.id !== initiative.id
-          ? i
-          : {
-              ...i,
-              status: 'passed' as const,
-              chosenOptionId: action.optionId,
-              options: i.options.map((o, idx) => ({ ...o, votes: blended[idx] })),
-            },
-      )
-
-      const nextProblems: CityProblem[] = state.problems.map((p) =>
-        p.initiativeId === initiative.id ? { ...p, resolved: true } : p,
-      )
-
-      const decision: DecisionRecord = {
-        initiativeId: initiative.id,
-        optionId: chosen.id,
-        before,
-        after,
-        deltas: diffIndicators(before, after),
+    case 'SEND_HQ_CHAT': {
+      const text = action.text.trim()
+      if (!text) return state
+      const msg: ChatMessage = {
+        id: uid('hqme'),
+        author: 'You',
+        initials: 'C',
+        color: '#2B2740',
+        text,
+        time: nowTime(),
+        mine: true,
       }
-
-      const feedEvents: FeedEvent[] = [
-        {
-          id: nextFeedId(),
-          icon: chosen.id === 'tram' ? '🚇' : '📜',
-          text:
-            chosen.id === 'tram'
-              ? 'The Downtown Tram Line has been approved by citizens.'
-              : `Citizens approved: ${chosen.title}.`,
-          time: 'now',
-          tone: chosen.id === 'tram' ? 'teal' : 'blue',
-        },
-        {
-          id: nextFeedId(),
-          icon: '✅',
-          text: `${initiative.question
-            .toLowerCase()
-            .replace(/\?$/, '')} — decision recorded.`,
-          time: 'now',
-          tone: 'sage',
-        },
-      ]
-
-      const tramBuilt = state.stats.tramBuilt || chosen.id === 'tram'
-
-      return {
-        ...state,
-        indicators: after,
-        initiatives: nextInitiatives,
-        problems: nextProblems,
-        stats: {
-          ...state.stats,
-          budget: state.stats.budget - chosen.cost,
-          tramBuilt,
-        },
-        feed: [...feedEvents, ...state.feed],
-        lastDecision: decision,
-        userVotes: { ...state.userVotes, [initiative.id]: chosen.id },
-        toasts: [
-          ...state.toasts,
-          makeToast(
-            chosen.id === 'tram' ? '🚇' : '📜',
-            chosen.id === 'tram' ? 'Tram line approved' : 'Decision recorded',
-            'teal',
-            chosen.id === 'tram'
-              ? 'Downtown relief works begin this season.'
-              : chosen.title,
-          ),
-        ],
-      }
+      return { ...state, hq: { ...state.hq, chat: [...state.hq.chat, msg] } }
     }
 
     case 'JOIN_CHALLENGE':
       return {
         ...state,
-        challenges: state.challenges.map((c) =>
-          c.id === action.challengeId ? { ...c, joined: true } : c,
-        ),
+        challenges: state.challenges.map((c) => (c.id === action.challengeId ? { ...c, joined: true } : c)),
       }
 
     case 'COMPLETE_CHALLENGE': {
       const challenge = state.challenges.find((c) => c.id === action.challengeId)
       if (!challenge || challenge.completed) return state
-
-      const nextChallenges = state.challenges.map((c) =>
-        c.id === action.challengeId
-          ? { ...c, progress: c.goal, completed: true, joined: true }
-          : c,
-      )
-
-      const feedEvents: FeedEvent[] = [
-        {
-          id: nextFeedId(),
-          icon: challenge.icon,
-          text: `${challenge.goal} citizens completed the ${challenge.title}.`,
-          time: 'now',
-          tone: 'sage',
-        },
-        {
-          id: nextFeedId(),
-          icon: '🌳',
-          text: `The community unlocked the ${challenge.unlockedLabel}.`,
-          time: 'now',
-          tone: 'sage',
-        },
-      ]
-
       const isMobility = challenge.id === 'mobility'
-
       return {
         ...state,
-        challenges: nextChallenges,
-        indicators: isMobility
-          ? applyEffects(state.indicators, { happiness: 4, environment: 3 })
-          : state.indicators,
+        challenges: state.challenges.map((c) =>
+          c.id === action.challengeId ? { ...c, progress: c.goal, completed: true, joined: true } : c,
+        ),
+        indicators: isMobility ? applyEffects(state.indicators, { happiness: 4, environment: 3 }) : state.indicators,
         stats: {
           ...state.stats,
           parkUnlocked: state.stats.parkUnlocked || isMobility,
@@ -411,15 +443,14 @@ function reducer(state: GameState, action: Action): GameState {
           civicScore: state.profile.civicScore + 50,
           sustainability: clamp(state.profile.sustainability + 6),
         },
-        feed: [...feedEvents, ...state.feed],
+        feed: [
+          { id: uid('feed'), icon: challenge.icon, text: `${challenge.goal} citizens completed the ${challenge.title}.`, time: 'now', tone: 'sage' },
+          { id: uid('feed'), icon: '🌳', text: `The community unlocked the ${challenge.unlockedLabel}.`, time: 'now', tone: 'sage' },
+          ...state.feed,
+        ],
         toasts: [
           ...state.toasts,
-          makeToast(
-            challenge.icon,
-            'City goal achieved',
-            'sage',
-            `🌳 ${challenge.unlockedLabel} unlocked`,
-          ),
+          makeToast(challenge.icon, 'City goal achieved', 'sage', `🌳 ${challenge.unlockedLabel} unlocked`),
         ],
       }
     }
@@ -428,26 +459,12 @@ function reducer(state: GameState, action: Action): GameState {
       const population = state.stats.population + action.count
       const districts = Math.max(state.stats.districts, Math.floor(population / 300))
       const unlocked = districts > state.stats.districts
-
       const feed: FeedEvent[] = [
-        {
-          id: nextFeedId(),
-          icon: '🏘️',
-          text: `${action.count.toLocaleString()} new citizens joined Civitas.`,
-          time: 'now',
-          tone: 'blue',
-        },
+        { id: uid('feed'), icon: '🏘️', text: `${action.count.toLocaleString()} new citizens joined Civitas.`, time: 'now', tone: 'blue' },
       ]
       if (unlocked) {
-        feed.push({
-          id: nextFeedId(),
-          icon: '🏙️',
-          text: 'A new residential block has appeared on the map.',
-          time: 'now',
-          tone: 'orange',
-        })
+        feed.unshift({ id: uid('feed'), icon: '🏙️', text: 'A new residential block has appeared on the map.', time: 'now', tone: 'orange' })
       }
-
       return {
         ...state,
         stats: { ...state.stats, population, districts },
@@ -455,12 +472,7 @@ function reducer(state: GameState, action: Action): GameState {
         arrivalPulse: state.arrivalPulse + 1,
         toasts: [
           ...state.toasts,
-          makeToast(
-            '🏘️',
-            `${action.count} citizens arrived`,
-            'blue',
-            unlocked ? 'A new neighbourhood is blooming.' : undefined,
-          ),
+          makeToast('🏘️', `${action.count} citizens arrived`, 'blue', unlocked ? 'A new neighbourhood is blooming.' : undefined),
         ],
       }
     }
@@ -480,20 +492,21 @@ function reducer(state: GameState, action: Action): GameState {
 interface GameContextValue {
   state: GameState
   dispatch: React.Dispatch<Action>
+  parties: Party[]
   openView: (view: ViewKey) => void
   closeSheet: () => void
   openProblem: (problemId: string) => void
-  openInitiative: (initiativeId: string) => void
   openParty: (partyId: string) => void
   joinParty: (partyId: string) => void
-  castVote: (initiativeId: string, optionId: string) => void
+  openPartyHq: (problemId?: string) => void
+  adoptMeasure: (input: MeasureInput) => void
   completeChallenge: (challengeId: string) => void
   joinChallenge: (challengeId: string) => void
   addCitizens: (count: number) => void
   setChatTab: (tab: ChatTab) => void
   sendChat: (text: string) => void
+  sendHqChat: (text: string) => void
   dismissToast: (id: string) => void
-  parties: typeof PARTIES
 }
 
 const GameContext = createContext<GameContextValue | null>(null)
@@ -503,70 +516,54 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const openView = useCallback((view: ViewKey) => dispatch({ type: 'OPEN_VIEW', view }), [])
   const closeSheet = useCallback(() => dispatch({ type: 'CLOSE_SHEET' }), [])
-  const openProblem = useCallback(
-    (problemId: string) => dispatch({ type: 'OPEN_PROBLEM', problemId }),
-    [],
-  )
-  const openInitiative = useCallback(
-    (initiativeId: string) => dispatch({ type: 'OPEN_INITIATIVE', initiativeId }),
-    [],
-  )
+  const openProblem = useCallback((problemId: string) => dispatch({ type: 'OPEN_PROBLEM', problemId }), [])
   const openParty = useCallback((partyId: string) => dispatch({ type: 'OPEN_PARTY', partyId }), [])
   const joinParty = useCallback((partyId: string) => dispatch({ type: 'JOIN_PARTY', partyId }), [])
-  const castVote = useCallback(
-    (initiativeId: string, optionId: string) =>
-      dispatch({ type: 'CAST_VOTE', initiativeId, optionId }),
-    [],
-  )
-  const completeChallenge = useCallback(
-    (challengeId: string) => dispatch({ type: 'COMPLETE_CHALLENGE', challengeId }),
-    [],
-  )
-  const joinChallenge = useCallback(
-    (challengeId: string) => dispatch({ type: 'JOIN_CHALLENGE', challengeId }),
-    [],
-  )
-  const addCitizens = useCallback(
-    (count: number) => dispatch({ type: 'ADD_CITIZENS', count }),
-    [],
-  )
+  const openPartyHq = useCallback((problemId?: string) => dispatch({ type: 'OPEN_HQ', problemId }), [])
+  const adoptMeasure = useCallback((input: MeasureInput) => dispatch({ type: 'ADOPT_MEASURE', input }), [])
+  const completeChallenge = useCallback((challengeId: string) => dispatch({ type: 'COMPLETE_CHALLENGE', challengeId }), [])
+  const joinChallenge = useCallback((challengeId: string) => dispatch({ type: 'JOIN_CHALLENGE', challengeId }), [])
+  const addCitizens = useCallback((count: number) => dispatch({ type: 'ADD_CITIZENS', count }), [])
   const setChatTab = useCallback((tab: ChatTab) => dispatch({ type: 'SET_CHAT_TAB', tab }), [])
   const sendChat = useCallback((text: string) => dispatch({ type: 'SEND_CHAT', text }), [])
+  const sendHqChat = useCallback((text: string) => dispatch({ type: 'SEND_HQ_CHAT', text }), [])
   const dismissToast = useCallback((id: string) => dispatch({ type: 'DISMISS_TOAST', id }), [])
 
   const value = useMemo<GameContextValue>(
     () => ({
       state,
       dispatch,
+      parties: state.parties,
       openView,
       closeSheet,
       openProblem,
-      openInitiative,
       openParty,
       joinParty,
-      castVote,
+      openPartyHq,
+      adoptMeasure,
       completeChallenge,
       joinChallenge,
       addCitizens,
       setChatTab,
       sendChat,
+      sendHqChat,
       dismissToast,
-      parties: PARTIES,
     }),
     [
       state,
       openView,
       closeSheet,
       openProblem,
-      openInitiative,
       openParty,
       joinParty,
-      castVote,
+      openPartyHq,
+      adoptMeasure,
       completeChallenge,
       joinChallenge,
       addCitizens,
       setChatTab,
       sendChat,
+      sendHqChat,
       dismissToast,
     ],
   )

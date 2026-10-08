@@ -12,3 +12,17 @@
     -webkit-overflow-scrolling: touch;
   }
 }
+
+.attention--hq {
+  background: var(--teal-pale);
+  border-color: var(--ink);
+}
+
+.attention--static {
+  cursor: default;
+}
+
+.attention--static:hover {
+  transform: none;
+  box-shadow: var(--sh-xs);
+}

@@ -1,0 +1,132 @@
+.issues-layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .issues-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.issues-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+@media (min-width: 901px) {
+  .issues-list {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.prow {
+  display: flex;
+  gap: 11px;
+  padding: 11px;
+  border-radius: var(--r-md);
+  background: var(--card);
+  border: 2px solid rgba(43, 39, 64, 0.14);
+  text-align: left;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  animation: riseIn 0.42s var(--ease) backwards;
+}
+.prow:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--sh-sm);
+}
+.prow.is-active {
+  border-color: var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.prow__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-sm);
+  font-size: 19px;
+  border: 2px solid var(--ink);
+  flex: none;
+  background: var(--paper-2);
+}
+.prow__icon--critical { background: var(--pink-pale); }
+.prow__icon--warning { background: var(--yellow-pale); }
+.prow__icon--watch { background: var(--teal-pale); }
+.prow__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.prow__top {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  justify-content: space-between;
+}
+.prow__title {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.prow__metric {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-faint);
+}
+.prow__bar {
+  height: 8px;
+  border-radius: 3px;
+  background: var(--card-sunk);
+  border: 2px solid var(--ink);
+  overflow: hidden;
+  margin-top: 2px;
+}
+.prow__fill {
+  display: block;
+  height: 100%;
+  transition: width 0.8s var(--ease);
+}
+
+.issues-detail {
+  display: flex;
+  flex-direction: column;
+  scroll-margin-top: 12px;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--r-md);
+  background: var(--card-sunk);
+  border: 2px dashed rgba(43, 39, 64, 0.22);
+}
+.empty__icon {
+  font-size: 26px;
+}
+.empty__title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.issues-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--teal-pale);
+  border-color: var(--ink);
+}
+@media (max-width: 560px) {
+  .issues-cta .btn {
+    width: 100%;
+  }
+}

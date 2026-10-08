@@ -23,6 +23,14 @@ export type ProblemKind =
   | 'pollution'
   | 'health'
 
+export type ProblemStatus = 'open' | 'in-progress' | 'resolved'
+
+export interface ProblemTimelineEntry {
+  time: string
+  text: string
+  partyId?: string
+}
+
 export interface CityProblem {
   id: string
   kind: ProblemKind
@@ -34,45 +42,60 @@ export interface CityProblem {
   x: number
   y: number
   severity: 'critical' | 'warning' | 'watch'
-  /** id of the initiative this problem asks the city to resolve */
-  initiativeId: string
-  resolved: boolean
+  status: ProblemStatus
+  /** 0..100 — how far the city has got toward solving it */
+  progress: number
+  timeline: ProblemTimelineEntry[]
 }
 
-export interface PolicyImpact {
-  label: string
-  value: string
-  tone: 'good' | 'bad' | 'neutral'
-}
+/* ------------------------------------------------------------
+   Measures — the decisions political parties actually take
+   ------------------------------------------------------------ */
 
-export interface PolicyOption {
+export type MeasureStatus = 'applied' | 'adopted' | 'rejected'
+
+export interface Measure {
   id: string
-  title: string
-  blurb: string
-  cost: number
-  impacts: PolicyImpact[]
-  votes: number
-  /** indicator deltas applied to the city when this option passes */
-  effect?: Partial<Record<IndicatorKey, number>>
-}
-
-export interface Initiative {
-  id: string
-  question: string
-  context: string
   problemId: string
-  options: PolicyOption[]
-  status: 'open' | 'passed' | 'closed'
-  chosenOptionId?: string
-  closesIn: string
-  voters: number
+  /** null when a measure is not tied to a specific problem */
+  partyId: string
+  title: string
+  /** the raw text the deputy wrote */
+  body: string
+  tags: string[]
+  cost: number
+  status: MeasureStatus
+  createdAt: string
+  /** internal party vote that carried it */
+  votes: { for: number; against: number }
+  effects: Partial<Record<IndicatorKey, number>>
+  summary: string
+  /** structural flags the "AI" picked up, used to change the map */
+  flags: { tram?: boolean; park?: boolean; housing?: boolean }
+}
+
+/* ------------------------------------------------------------
+   Parties
+   ------------------------------------------------------------ */
+
+export interface Mp {
+  id: string
+  name: string
+  initials: string
+  role: string
+  online: boolean
+}
+
+export interface Announcement {
+  id: string
+  time: string
+  text: string
 }
 
 export interface Party {
   id: string
   name: string
   short: string
-  /** emoji / glyph mark */
   mark: string
   color: string
   colorSoft: string
@@ -84,7 +107,36 @@ export interface Party {
   popularity: number
   seats: number
   leader: string
+  headOfGovernment: boolean
+  mps: Mp[]
+  announcements: Announcement[]
 }
+
+/* ------------------------------------------------------------
+   Party HQ — the deputy's desk (hidden screen)
+   ------------------------------------------------------------ */
+
+export interface HqAgendaItem {
+  id: string
+  time: string
+  text: string
+  tone: 'sage' | 'teal' | 'blue' | 'orange' | 'pink' | 'yellow'
+}
+
+export interface PartyHq {
+  partyId: string
+  treasury: number
+  approval: number
+  coalition: string[]
+  /** next election countdown */
+  electionIn: string
+  chat: ChatMessage[]
+  agenda: HqAgendaItem[]
+}
+
+/* ------------------------------------------------------------
+   Shared
+   ------------------------------------------------------------ */
 
 export interface Challenge {
   id: string
@@ -107,7 +159,7 @@ export interface FeedEvent {
   tone: 'sage' | 'teal' | 'blue' | 'orange' | 'pink' | 'yellow'
 }
 
-export type ChatTab = 'GLOBAL' | 'PARTY' | 'DISTRICT' | 'INITIATIVE'
+export type ChatTab = 'GLOBAL' | 'PARTY' | 'DISTRICT' | 'MEASURES'
 
 export interface ChatMessage {
   id: string
@@ -148,9 +200,10 @@ export interface Toast {
 export type ViewKey =
   | 'city'
   | 'issues'
-  | 'initiatives'
+  | 'measures'
   | 'parties'
   | 'election'
   | 'challenges'
   | 'community'
   | 'profile'
+  | 'partyhq'

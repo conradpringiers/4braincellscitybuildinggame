@@ -3,10 +3,10 @@ import type { ViewKey } from '../state/types'
 import { Icon, type IconName } from './Icon'
 import './NavDock.css'
 
-const ITEMS: { key: ViewKey | 'profile'; label: string; icon: IconName }[] = [
+const ITEMS: { key: ViewKey; label: string; icon: IconName }[] = [
   { key: 'city', label: 'City', icon: 'city' },
   { key: 'issues', label: 'Issues', icon: 'alert' },
-  { key: 'initiatives', label: 'Initiatives', icon: 'scroll' },
+  { key: 'measures', label: 'Measures', icon: 'scroll' },
   { key: 'parties', label: 'Parties', icon: 'flag' },
   { key: 'election', label: 'Election', icon: 'ballot' },
   { key: 'challenges', label: 'Challenges', icon: 'leaf' },
@@ -16,13 +16,11 @@ const ITEMS: { key: ViewKey | 'profile'; label: string; icon: IconName }[] = [
 export default function NavDock() {
   const { state, openView } = useGame()
   const active = state.view
-  const openProblems = state.problems.filter((p) => !p.resolved).length
-  const openInitiatives = state.initiatives.filter((i) => i.status === 'open').length
+  const openProblems = state.problems.filter((p) => p.status !== 'resolved').length
   const challengeReady = state.challenges.some((c) => !c.completed)
 
-  const badgeFor = (key: ViewKey | 'profile') => {
+  const badgeFor = (key: ViewKey) => {
     if (key === 'issues') return openProblems || undefined
-    if (key === 'initiatives') return openInitiatives || undefined
     if (key === 'challenges' && challengeReady) return '!'
     return undefined
   }
@@ -37,7 +35,7 @@ export default function NavDock() {
             <li key={item.key}>
               <button
                 className={`dock__item ${isActive ? 'is-active' : ''}`}
-                onClick={() => openView(item.key as ViewKey)}
+                onClick={() => openView(item.key)}
                 aria-current={isActive ? 'page' : undefined}
               >
                 <span className="dock__icon">

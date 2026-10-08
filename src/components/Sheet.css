@@ -46,6 +46,34 @@
   }
 }
 
+/* ---------- exit ---------- */
+.sheet.is-closing .sheet__backdrop {
+  animation: fadeOut 0.17s var(--ease) both;
+}
+.sheet.is-closing .sheet__panel {
+  animation: sheetOut 0.17s var(--ease) both;
+}
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes sheetOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+  }
+}
+
+/* staggered entrances for list content inside a sheet:
+   children keep their own .rise-style animation; this only adds the delay */
+.stagger > * {
+  animation-delay: calc(var(--i, 0) * 32ms + 60ms);
+}
+
 .sheet__header {
   display: flex;
   align-items: flex-start;

@@ -1,111 +1,204 @@
+import { useEffect, useRef } from 'react'
 import { useGame } from '../state/GameContext'
 import Sheet from '../components/Sheet'
 import { Icon } from '../components/Icon'
+import { MeasureCard } from '../components/MeasureCard'
+import { stagger } from '../components/motion'
+import { PROBLEM_ICON } from '../state/mockData'
 import type { CityProblem } from '../state/types'
 import '../components/views.css'
+import './IssuesView.css'
 
-const KIND_ICON: Record<CityProblem['kind'], string> = {
-  traffic: '🚗',
-  water: '💧',
-  housing: '🏠',
-  energy: '⚡',
-  waste: '🗑️',
-  pollution: '🌫️',
-  health: '🏥',
+const STATUS_LABEL: Record<CityProblem['status'], string> = {
+  open: 'Open',
+  'in-progress': 'In progress',
+  resolved: 'Resolved',
 }
 
-const SEV_TONE: Record<CityProblem['severity'], string> = {
+const SEV_CLASS: Record<CityProblem['severity'], string> = {
   critical: 'critical',
   warning: 'warning',
   watch: 'watch',
 }
 
 export default function IssuesView() {
-  const { state, closeSheet, openInitiative, openView } = useGame()
-  const { problems, activeProblemId } = state
-  const openCount = problems.filter((p) => !p.resolved).length
+  const { state, closeSheet, openProblem, openPartyHq, openView } = useGame()
+  const { problems, measures, parties, activeProblemId } = state
+  const detailRef = useRef<HTMLDivElement>(null)
+
+  const selected =
+    problems.find((p) => p.id === activeProblemId) ?? problems[0] ?? null
+
+  const openCount = problems.filter((p) => p.status !== 'resolved').length
+
+  // on phones the list stacks above the detail — bring the detail into view
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (window.innerWidth <= 900 && activeProblemId) {
+      detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [activeProblemId])
+
+  const problemMeasures = selected
+    ? measures.filter((m) => m.problemId === selected.id)
+    : []
 
   return (
     <Sheet
       eyebrow="City Issues"
       title="What needs fixing"
-      subtitle={`${openCount} active pressures are being tracked across Civitas. Citizens decide how to respond.`}
+      subtitle={`${openCount} active pressures are tracked across Civitas. Details below, and the measures the parties have already taken.`}
       onClose={closeSheet}
-      size="lg"
+      size="xl"
     >
-      <div className="vsection">
-        <div className="vsection__head">
+      <div className="issues-layout">
+        {/* ---------- list ---------- */}
+        <aside className="issues-list stagger">
           <span className="vsection__title--caps">Live pressures</span>
-          <span className="hint">Tap an issue to open its initiative</span>
-        </div>
-
-        <div className="stack-sm">
-          {problems.map((p) => {
-            const initiative = state.initiatives.find((i) => i.id === p.initiativeId)
-            const resolved = p.resolved
+          {problems.map((p, i) => {
+            const isActive = selected?.id === p.id
             return (
-              <article
+              <button
                 key={p.id}
-                className={`issue ${resolved ? 'is-resolved' : ''} ${
-                  activeProblemId === p.id ? 'is-active' : ''
-                }`}
+                className={`prow ${isActive ? 'is-active' : ''}`}
+                onClick={() => openProblem(p.id)}
+                style={stagger(i)}
               >
-                <span
-                  className="issue__icon"
-                  style={{ background: resolved ? 'var(--sage-pale)' : 'var(--paper-2)' }}
-                  aria-hidden
-                >
-                  {resolved ? '✅' : KIND_ICON[p.kind]}
-                </span>
-
-                <div className="issue__body">
-                  <div className="issue__top">
-                    <span className="issue__title">{p.title}</span>
-                    <span className={`sev sev--${resolved ? 'ok' : SEV_TONE[p.severity]}`}>
-                      {resolved ? 'Resolved' : p.severity}
+                <span className={`prow__icon prow__icon--${p.severity}`}>{PROBLEM_ICON[p.kind]}</span>
+                <span className="prow__body">
+                  <span className="prow__top">
+                    <span className="prow__title">{p.title}</span>
+                    <span className={`sev sev--${p.severity === 'critical' ? 'critical' : p.severity === 'warning' ? 'warning' : 'watch'}`}>
+                      {p.severity}
                     </span>
-                  </div>
-                  <span className="issue__metric">{p.metric}</span>
-                  <span className="issue__detail">{p.detail}</span>
-                </div>
-
-                {resolved ? (
-                  <span className="chip chip--sage">
-                    <Icon name="check" size={14} /> Addressed
                   </span>
-                ) : (
-                  <button
-                    className="btn btn--sm btn--primary"
-                    onClick={() => (initiative ? openInitiative(initiative.id) : openView('initiatives'))}
-                  >
-                    Open initiative
-                    <Icon name="chevron" size={15} />
-                  </button>
-                )}
-              </article>
+                  <span className="prow__metric">{p.metric}</span>
+                  <span className="prow__bar">
+                    <span
+                      className="prow__fill"
+                      style={{
+                        width: `${p.progress}%`,
+                        background: p.status === 'resolved' ? 'var(--sage)' : 'var(--teal)',
+                      }}
+                    />
+                  </span>
+                </span>
+              </button>
             )
           })}
-        </div>
-      </div>
+        </aside>
 
-      <div className="vsection">
-        <div className="vcard" style={{ background: 'var(--sage-pale)', borderColor: 'transparent' }}>
-          <div className="flex-between flex-wrap" style={{ gap: 14 }}>
-            <div className="stack-sm" style={{ gap: 4, maxWidth: '58ch' }}>
-              <span className="eyebrow" style={{ color: '#2F7A48' }}>
-                How it works
-              </span>
-              <strong style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>
-                Growth creates problems. Citizens solve them together.
-              </strong>
-              <span className="hint" style={{ color: '#3F6B48' }}>
-                Every issue opens an initiative. Parties take positions, citizens vote, and the
-                winning policy changes the city's indicators on the map.
-              </span>
+        {/* ---------- detail ---------- */}
+        <div className="issues-detail" ref={detailRef}>
+          {selected && (
+            <div className="vcard pdetail">
+              <div className="pdetail__head">
+                <span className="pdetail__icon">{PROBLEM_ICON[selected.kind]}</span>
+                <div className="pdetail__id">
+                  <div className="issue__top">
+                    <span className={`sev sev--${SEV_CLASS[selected.severity]}`}>
+                      {selected.severity}
+                    </span>
+                    <span className={`sev sev--${selected.status === 'resolved' ? 'done' : selected.status === 'in-progress' ? 'progress' : 'open'}`}>
+                      {STATUS_LABEL[selected.status]}
+                    </span>
+                  </div>
+                  <h3 className="pdetail__title">{selected.title}</h3>
+                  <span className="pdetail__metric">{selected.metric}</span>
+                </div>
+              </div>
+
+              <div className="prog">
+                <div className="prog__labels">
+                  <span className="hint">Resolution progress</span>
+                  <span className="prog__count">{selected.progress}%</span>
+                </div>
+                <div className="prog__track">
+                  <div
+                    className="prog__fill"
+                    style={{ width: `${selected.progress}%`, backgroundColor: 'var(--teal)' }}
+                  />
+                </div>
+              </div>
+
+              <p className="pdetail__text">{selected.detail}</p>
+
+              <div className="vsection" style={{ marginBottom: 0 }}>
+                <span className="vsection__title--caps">Recent activity</span>
+                <div className="timeline">
+                  {selected.timeline.map((t, i) => {
+                    const party = parties.find((p) => p.id === t.partyId)
+                    return (
+                      <div key={i} className="timeline__item">
+                        <span
+                          className="timeline__dot"
+                          style={{ background: party?.color ?? 'var(--paper-3)' }}
+                        />
+                        <span className="timeline__text">{t.text}</span>
+                        <span className="timeline__time">{t.time}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
-            <button className="btn btn--sage" onClick={() => openView('initiatives')}>
-              <Icon name="scroll" size={17} /> Go to initiatives
-            </button>
+          )}
+
+          <div className="vsection" style={{ marginTop: 20 }}>
+            <div className="vsection__head">
+              <span className="vsection__title--caps">
+                Measures on this problem ({problemMeasures.length})
+              </span>
+              {measures.length > 0 && (
+                <button className="btn btn--ghost btn--sm" onClick={() => openView('measures')}>
+                  All measures
+                </button>
+              )}
+            </div>
+
+            {problemMeasures.length === 0 ? (
+              <div className="empty">
+                <span className="empty__icon">🗳️</span>
+                <div className="stack-sm" style={{ gap: 4 }}>
+                  <strong className="empty__title">No measure yet</strong>
+                  <span className="hint">
+                    Parties haven’t acted on this problem. As a deputy you can draft the first
+                    measure in Party HQ.
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="stack-sm">
+                {problemMeasures.map((m) => (
+                  <MeasureCard
+                    key={m.id}
+                    measure={m}
+                    party={parties.find((p) => p.id === m.partyId)}
+                    showBody={false}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="vsection" style={{ marginBottom: 0 }}>
+            <div className="vcard issues-cta">
+              <div className="stack-sm" style={{ gap: 4, maxWidth: '52ch' }}>
+                <span className="eyebrow" style={{ color: '#2A7268' }}>
+                  Party HQ
+                </span>
+                <strong style={{ fontFamily: 'var(--font-display)', fontSize: 19 }}>
+                  Parties decide. You are a deputy.
+                </strong>
+                <span className="hint" style={{ color: '#3F6B48' }}>
+                  Open your party desk to write a measure for this problem — the policy analyst
+                  turns your text into a real city impact.
+                </span>
+              </div>
+              <button className="btn btn--teal" onClick={() => selected && openPartyHq(selected.id)}>
+                <Icon name="key" size={16} /> Raise a measure
+              </button>
+            </div>
           </div>
         </div>
       </div>

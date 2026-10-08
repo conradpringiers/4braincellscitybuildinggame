@@ -58,7 +58,7 @@ function ProblemPin({
   const cardY = -cardH - 20
   const sev = SEVERITY[problem.severity]
 
-  if (problem.resolved) {
+  if (problem.status === 'resolved') {
     return (
       <g className="pin pin--resolved" transform={`translate(${problem.x} ${problem.y})`}>
         <rect x={-13} y={-11} width={26} height={26} rx={4} fill="#FFFDF6" stroke="#2B2740" strokeWidth={2.5} />
@@ -143,7 +143,7 @@ function ProblemPin({
 export default function CityMap() {
   const { state, openProblem } = useGame()
   const { problems, stats, arrivalPulse } = state
-  const trafficOpen = problems.some((p) => p.kind === 'traffic' && !p.resolved)
+  const trafficOpen = problems.some((p) => p.kind === 'traffic' && p.status !== 'resolved')
 
   return (
     <div className="citymap">
